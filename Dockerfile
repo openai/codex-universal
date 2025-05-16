@@ -92,6 +92,7 @@ RUN git -c advice.detachedHead=0 clone --branch ${PYENV_VERSION} --depth 1 https
 ENV PIPX_BIN_DIR=/root/.local/bin
 ENV PATH=$PIPX_BIN_DIR:$PATH
 RUN apt-get update && apt-get install -y pipx \
+    && rm -rf /var/lib/apt/lists/* \
     && pipx install poetry uv \
     # Preinstall common packages for each version
     && for pyv in $(ls ${PYENV_ROOT}/versions/); do \
@@ -173,7 +174,8 @@ RUN mkdir /tmp/swiftly \
 ### RUBY ###
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        ruby-full
+        ruby-full \
+    && rm -rf /var/lib/apt/lists/*
 
 ### RUST ###
 

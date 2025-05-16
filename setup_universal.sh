@@ -7,6 +7,7 @@ CODEX_ENV_NODE_VERSION=${CODEX_ENV_NODE_VERSION:-}
 CODEX_ENV_RUST_VERSION=${CODEX_ENV_RUST_VERSION:-}
 CODEX_ENV_GO_VERSION=${CODEX_ENV_GO_VERSION:-}
 CODEX_ENV_SWIFT_VERSION=${CODEX_ENV_SWIFT_VERSION:-}
+CODEX_ENV_PHP_VERSION=${CODEX_ENV_PHP_VERSION:-}
 
 echo "Configuring language runtimes..."
 
@@ -59,4 +60,15 @@ if [ -n "${CODEX_ENV_SWIFT_VERSION}" ]; then
     if [ "${current}" != "${CODEX_ENV_SWIFT_VERSION}" ]; then
         swiftly install --use "${CODEX_ENV_SWIFT_VERSION}"
     fi
+fi
+
+if [ -n "${CODEX_ENV_PHP_VERSION}" ]; then
+    echo "# PHP: ${CODEX_ENV_PHP_VERSION}"
+    bin="/usr/bin/php${CODEX_ENV_PHP_VERSION}"
+    if [ ! -x "$bin" ]; then
+        echo "❌ PHP $CODEX_ENV_PHP_VERSION not installed (check supported list)"; exit 1
+    fi
+    update-alternatives --set php $bin
+    update-alternatives --set phpize /usr/bin/phpize${CODEX_ENV_PHP_VERSION}
+    update-alternatives --set php-config /usr/bin/php-config${CODEX_ENV_PHP_VERSION}
 fi

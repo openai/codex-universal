@@ -221,6 +221,21 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/* \
     && bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
 
+### PHP ###
+
+ARG PHP_VERSIONS="8.2 8.3 8.4"
+
+RUN add-apt-repository -y ppa:ondrej/php
+RUN apt-get update && \
+    for v in $PHP_VERSIONS; do \
+      apt-get install -y --no-install-recommends \
+        php${v} php${v}-cli php${v}-dev \
+        php${v}-xml php${v}-mbstring php${v}-curl php${v}-zip php${v}-bcmath; \
+    done && \
+    apt-get install -y --no-install-recommends composer && \
+    rm -rf /var/lib/apt/lists/*
+ENV PATH="/root/.config/composer/vendor/bin:$PATH"
+
 ### SETUP SCRIPTS ###
 
 COPY setup_universal.sh /opt/codex/setup_universal.sh

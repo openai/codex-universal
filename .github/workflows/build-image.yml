@@ -4,6 +4,12 @@ on:
   push:
     branches: [ "main" ]
 
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+  attestations: write
+
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
@@ -27,9 +33,16 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
     - name: Build and push
+      id: docker_build
       uses: docker/build-push-action@v6
       with:
         push: true
         tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
         cache-from: type=gha
         cache-to: type=gha,mode=max
+    - name: Generate artifact attestation
+      uses: actions/attest-build-provenance@v2
+      with:
+        push-to-registry: true
+        subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        subject-digest: ${{ steps.docker_build.outputs.digest }}

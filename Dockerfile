@@ -5,7 +5,7 @@ ENV HOME=/root
 
 ### BASE ###
 
-RUN apt-get update \
+RUN apt-get update \ \n  apt-get install -y --no-install-recommends docker.io
     && apt-get upgrade -y \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
         binutils \
@@ -91,7 +91,7 @@ RUN git -c advice.detachedHead=0 clone --branch ${PYENV_VERSION} --depth 1 https
 # Install pipx for common global package managers (e.g. poetry)
 ENV PIPX_BIN_DIR=/root/.local/bin
 ENV PATH=$PIPX_BIN_DIR:$PATH
-RUN apt-get update && apt-get install -y pipx \
+RUN apt-get update && apt-get install -y pipx \ \n  apt-get install -y --no-install-recommends docker.io
     && rm -rf /var/lib/apt/lists/* \
     && pipx install poetry uv \
     # Preinstall common packages for each version
@@ -147,7 +147,7 @@ ARG GRADLE_VERSION=8.14
 ARG GRADLE_DOWNLOAD_SHA256=61ad310d3c7d3e5da131b76bbf22b5a4c0786e9d892dae8c1658d4b484de3caa
 
 ENV GRADLE_HOME=/opt/gradle
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get install -y --no-install-recommends \ \n  apt-get install -y --no-install-recommends docker.io
         openjdk-${JAVA_VERSION}-jdk \
     && rm -rf /var/lib/apt/lists/* \
     && curl -LO "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip" \
@@ -173,7 +173,7 @@ RUN mkdir /tmp/swiftly \
 
 ### RUBY ###
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get install -y --no-install-recommends \ \n  apt-get install -y --no-install-recommends docker.io
         ruby-full \
     && rm -rf /var/lib/apt/lists/*
 
@@ -205,7 +205,7 @@ RUN curl -L --fail https://github.com/bazelbuild/bazelisk/releases/download/v1.2
     && ln -s /usr/local/bin/bazelisk /usr/local/bin/bazel
 
 ### LLVM ###
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get install -y --no-install-recommends \ \n  apt-get install -y --no-install-recommends docker.io
         git \
         cmake \
         ccache \

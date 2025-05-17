@@ -49,7 +49,8 @@ jobs:
     
     - name: Generate artifact attestation
       uses: actions/attest-build-provenance@v2
+      if: ${{ github.event_name == 'push' }}
       with:
-        push-to-registry: ${{ github.event_name == 'push' }}
+        push-to-registry: true
         subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
         subject-digest: ${{ steps.docker_build.outputs.digest }}

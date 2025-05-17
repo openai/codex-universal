@@ -7,6 +7,7 @@ CODEX_ENV_NODE_VERSION=${CODEX_ENV_NODE_VERSION:-}
 CODEX_ENV_RUST_VERSION=${CODEX_ENV_RUST_VERSION:-}
 CODEX_ENV_GO_VERSION=${CODEX_ENV_GO_VERSION:-}
 CODEX_ENV_SWIFT_VERSION=${CODEX_ENV_SWIFT_VERSION:-}
+CODEX_ENV_RUBY_VERSION=${CODEX_ENV_RUBY_VERSION:-}
 
 echo "Configuring language runtimes..."
 
@@ -27,6 +28,15 @@ if [ -n "${CODEX_ENV_NODE_VERSION}" ]; then
     nvm use "${CODEX_ENV_NODE_VERSION}"
     corepack enable
     corepack install -g yarn pnpm npm
+fi
+
+if [ -n "${CODEX_ENV_RUBY_VERSION}" ]; then
+    current=$(ruby -v | awk '{print $2}' | cut -d'p' -f1)
+    echo "# Ruby: ${CODEX_ENV_RUBY_VERSION} (default: ${current})"
+    if [ "${current}" != "${CODEX_ENV_RUBY_VERSION}" ]; then
+        rbenv install -s "${CODEX_ENV_RUBY_VERSION}"
+        rbenv global "${CODEX_ENV_RUBY_VERSION}"
+    fi
 fi
 
 if [ -n "${CODEX_ENV_RUST_VERSION}" ]; then

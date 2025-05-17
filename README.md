@@ -21,6 +21,7 @@ docker run --rm -it \
     # See below for environment variable options.
     -e CODEX_ENV_PYTHON_VERSION=3.12 \
     -e CODEX_ENV_NODE_VERSION=20 \
+    -e CODEX_ENV_RUBY_VERSION=3.2.8 \
     -e CODEX_ENV_RUST_VERSION=1.87.0 \
     -e CODEX_ENV_GO_VERSION=1.23.8 \
     -e CODEX_ENV_SWIFT_VERSION=6.1 \
@@ -39,6 +40,7 @@ The following environment variables can be set to configure runtime installation
 | -------------------------- | -------------------------- | ------------------------------------------------ | -------------------------------------------------------------------- |
 | `CODEX_ENV_PYTHON_VERSION` | Python version to install  | `3.10`, `3.11.12`, `3.12`, `3.13`                | `pyenv`, `poetry`, `uv`, `ruff`, `black`, `mypy`, `pyright`, `isort` |
 | `CODEX_ENV_NODE_VERSION`   | Node.js version to install | `18`, `20`, `22`                                 | `corepack`, `yarn`, `pnpm`, `npm`                                    |
+| `CODEX_ENV_RUBY_VERSION`   | Ruby version to install    | `3.2.8`, `3.3.8`, `3.4.4`                        |                                                                      |
 | `CODEX_ENV_RUST_VERSION`   | Rust version to install    | `1.83.0`, `1.84.1`, `1.85.1`, `1.86.0`, `1.87.0` |                                                                      |
 | `CODEX_ENV_GO_VERSION`     | Go version to install      | `1.22.12`, `1.23.8`, `1.24.3`                    |                                                                      |
 | `CODEX_ENV_SWIFT_VERSION`  | Swift version to install   | `5.10`, `6.1`                                    |                                                                      |
@@ -47,7 +49,6 @@ The following environment variables can be set to configure runtime installation
 
 In addition to the packages specified in the table above, the following packages are also installed:
 
-- `ruby`: 3.2.3
 - `bun`: 1.2.10
 - `java`: 21
 - `bazelisk` / `bazel`

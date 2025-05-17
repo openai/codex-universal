@@ -78,27 +78,24 @@ RUN apt-get update \
 ARG PYENV_VERSION=v2.5.5
 ARG PYTHON_VERSION=3.11.12
 
-# Install pyenv
 ENV PYENV_ROOT=/root/.pyenv
 ENV PATH=$PYENV_ROOT/bin:$PATH
 RUN git -c advice.detachedHead=0 clone --branch ${PYENV_VERSION} --depth 1 https://github.com/pyenv/pyenv.git "${PYENV_ROOT}" \
     && echo 'export PYENV_ROOT="$HOME/.pyenv"' >> /etc/profile \
-    && echo 'export PATH="$$PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH"' >> /etc/profile \
+    && echo 'export PATH="$PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH"' >> /etc/profile \
     && echo 'eval "$(pyenv init - bash)"' >> /etc/profile \
     && cd ${PYENV_ROOT} && src/configure && make -C src \
     && pyenv install 3.10 3.11.12 3.12 3.13 \
     && pyenv global ${PYTHON_VERSION}
-# Install pipx for common global package managers (e.g. poetry)
+
 ENV PIPX_BIN_DIR=/root/.local/bin
 ENV PATH=$PIPX_BIN_DIR:$PATH
 RUN apt-get update && apt-get install -y pipx \
     && rm -rf /var/lib/apt/lists/* \
     && pipx install poetry uv \
-    # Preinstall common packages for each version
     && for pyv in $(ls ${PYENV_ROOT}/versions/); do \
         ${PYENV_ROOT}/versions/$pyv/bin/pip install --upgrade pip ruff black mypy pyright isort; \
     done
-
 
 ### NODE ###
 
@@ -106,8 +103,6 @@ ARG NVM_VERSION=v0.40.2
 ARG NODE_VERSION=22
 
 ENV NVM_DIR=/root/.nvm
-# Corepack tries to do too much - disable some of its features:
-# https://github.com/nodejs/corepack/blob/main/README.md
 ENV COREPACK_DEFAULT_TO_LATEST=0
 ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
 ENV COREPACK_ENABLE_AUTO_PIN=0
@@ -126,13 +121,10 @@ RUN git -c advice.detachedHead=0 clone --branch ${NVM_VERSION} --depth 1 https:/
 ### BUN ###
 
 ARG BUN_VERSION=1.2.10
-
 ENV BUN_INSTALL=/root/.bun
 ENV PATH="$BUN_INSTALL/bin:$PATH"
-
 RUN mkdir -p "$BUN_INSTALL/bin" \
-    && curl -L --fail "https://github.com/oven-sh/bun/releases/download/bun-v${BUN_VERSION}/bun-linux-x64-baseline.zip" \
-        -o /tmp/bun.zip \
+    && curl -L --fail "https://github.com/oven-sh/bun/releases/download/bun-v${BUN_VERSION}/bun-linux-x64-baseline.zip" -o /tmp/bun.zip \
     && unzip -q /tmp/bun.zip -d "$BUN_INSTALL/bin" \
     && mv "$BUN_INSTALL/bin/bun-linux-x64-baseline/bun" "$BUN_INSTALL/bin/bun" \
     && chmod +x "$BUN_INSTALL/bin/bun" \
@@ -147,8 +139,7 @@ ARG GRADLE_VERSION=8.14
 ARG GRADLE_DOWNLOAD_SHA256=61ad310d3c7d3e5da131b76bbf22b5a4c0786e9d892dae8c1658d4b484de3caa
 
 ENV GRADLE_HOME=/opt/gradle
-RUN apt-get update && apt-get install -y --no-install-recommends \
-        openjdk-${JAVA_VERSION}-jdk \
+RUN apt-get update && apt-get install -y --no-install-recommends openjdk-${JAVA_VERSION}-jdk \
     && rm -rf /var/lib/apt/lists/* \
     && curl -LO "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip" \
     && echo "${GRADLE_DOWNLOAD_SHA256} *gradle-${GRADLE_VERSION}-bin.zip" | sha256sum --check - \
@@ -160,8 +151,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 ### SWIFT ###
 
 ARG SWIFT_VERSION=6.1
-
-# Install swift.
 RUN mkdir /tmp/swiftly \
     && cd /tmp/swiftly \
     && curl -O https://download.swift.org/swiftly/linux/swiftly-$(uname -m).tar.gz \
@@ -173,14 +162,12 @@ RUN mkdir /tmp/swiftly \
 
 ### RUBY ###
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-        ruby-full \
+RUN apt-get update && apt-get install -y --no-install-recommends ruby-full \
     && rm -rf /var/lib/apt/lists/*
 
 ### RUST ###
 
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | \
-        sh -s -- -y --profile minimal \
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal \
     && . "$HOME/.cargo/env" \
     && rustup show
 
@@ -189,7 +176,6 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | \
 ARG GO_VERSION=1.23.8
 ARG GO_DOWNLOAD_SHA256=45b87381172a58d62c977f27c4683c8681ef36580abecd14fd124d24ca306d3f
 
-# Go defaults GOROOT to /usr/local/go - we just need to update PATH
 ENV PATH=/usr/local/go/bin:$HOME/go/bin:$PATH
 RUN mkdir /tmp/go \
     && cd /tmp/go \
@@ -205,21 +191,19 @@ RUN curl -L --fail https://github.com/bazelbuild/bazelisk/releases/download/v1.2
     && ln -s /usr/local/bin/bazelisk /usr/local/bin/bazel
 
 ### LLVM ###
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        git \
-        cmake \
-        ccache \
-        python3 \
-        ninja-build \
-        nasm \
-        yasm \
-        gawk \
-        lsb-release \
-        wget \
-        software-properties-common \
-        gnupg \
+        git cmake ccache python3 ninja-build nasm yasm gawk lsb-release wget software-properties-common gnupg \
     && rm -rf /var/lib/apt/lists/* \
     && bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
+
+### DOCKER ###
+
+RUN apt-get update -qq \
+    && apt-get install -y --no-install-recommends \
+        docker.io \
+        docker-compose-v2 \
+    && rm -rf /var/lib/apt/lists/*
 
 ### SETUP SCRIPTS ###
 
@@ -229,4 +213,4 @@ RUN chmod +x /opt/codex/setup_universal.sh
 COPY entrypoint.sh /opt/entrypoint.sh
 RUN chmod +x /opt/entrypoint.sh
 
-ENTRYPOINT  ["/opt/entrypoint.sh"]
+ENTRYPOINT ["/opt/entrypoint.sh"]

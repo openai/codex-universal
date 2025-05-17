@@ -173,9 +173,21 @@ RUN mkdir /tmp/swiftly \
 
 ### RUBY ###
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-        ruby-full \
-    && rm -rf /var/lib/apt/lists/*
+ARG RBENV_VERSION=v1.3.2
+ARG RUBY_VERSION=3.2.3
+
+ENV RBENV_ROOT=/root/.rbenv
+ENV PATH=$RBENV_ROOT/bin:$RBENV_ROOT/shims:$PATH
+
+RUN apt-get update && apt-get install -y --no-install-recommends libyaml-dev \
+    && git -c advice.detachedHead=0 clone --branch ${RBENV_VERSION} --depth 1 https://github.com/rbenv/rbenv.git "${RBENV_ROOT}" \
+    && mkdir -p "${RBENV_ROOT}/plugins" \
+    && git -c advice.detachedHead=0 clone https://github.com/rbenv/ruby-build.git "${RBENV_ROOT}/plugins/ruby-build" \
+    && echo 'export RBENV_ROOT="$HOME/.rbenv"' >> /etc/profile \
+    && echo 'export PATH="$RBENV_ROOT/bin:$RBENV_ROOT/shims:$PATH"' >> /etc/profile \
+    && echo 'eval "$(rbenv init - bash)"' >> /etc/profile \
+    && rbenv install ${RUBY_VERSION} \
+    && rbenv global ${RUBY_VERSION}
 
 ### RUST ###
 

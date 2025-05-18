@@ -56,7 +56,11 @@ See [Dockerfile](Dockerfile) for the full details of installed packages.
 
 ## Building with Nix
 
-You can build an equivalent image using [Nix](https://nixos.org/). The repository provides a Flake that produces a Docker image and a development shell. Ensure `nix` is installed with flakes enabled. To build the image:
+You can build an equivalent image using [Nix](https://nixos.org/). The repository provides a Flake that produces a Docker image and a development shell. Ensure `nix` is installed with flakes enabled.
+
+The Flake lockfile `flake.lock` should be kept current. Run `nix flake lock` when dependencies change to update it.
+
+To build the image:
 
 ```bash
 nix build .#dockerImage

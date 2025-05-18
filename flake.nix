@@ -38,9 +38,9 @@
           mkdir -p $out/opt/codex
           cp ${./setup_universal.sh} $out/opt/codex/setup_universal.sh
           chmod +x $out/opt/codex/setup_universal.sh
-          mkdir -p $out/opt
-          cp ${./entrypoint.sh} $out/opt/entrypoint.sh
-          chmod +x $out/opt/entrypoint.sh
+          mkdir -p $out/opt/codex
+          cp ${./entrypoint.sh} $out/opt/codex/entrypoint.sh
+          chmod +x $out/opt/codex/entrypoint.sh
         '';
 
       in {
@@ -48,7 +48,7 @@
           name = "codex-universal";
           contents = envPackages ++ [ codexScripts ];
           config = {
-            Entrypoint = [ "/opt/entrypoint.sh" ];
+            Entrypoint = [ "/opt/codex/entrypoint.sh" ];
             Env = [ "NIX_CONFIG=experimental-features\ =\ nix-command\ flakes" ];
           };
         };

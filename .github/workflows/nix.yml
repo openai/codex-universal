@@ -9,6 +9,9 @@ on:
 jobs:
   build-flake:
     runs-on: ubuntu-latest
+    env:
+      REGISTRY: ghcr.io
+      IMAGE_NAME: ${{ github.repository }}
     steps:
       - uses: actions/checkout@v4
       - name: Install Nix
@@ -17,4 +20,19 @@ jobs:
         uses: DeterminateSystems/magic-nix-cache-action@v2
       - name: Build container image
         run: nix build .#dockerImage
+      - name: Load image
+        run: docker load < result
+      - name: Log in to ghcr.io
+        if: ${{ github.event_name == 'push' }}
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Tag image
+        if: ${{ github.event_name == 'push' }}
+        run: docker tag codex-universal:latest ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+      - name: Push image
+        if: ${{ github.event_name == 'push' }}
+        run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
 

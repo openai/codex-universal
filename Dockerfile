@@ -198,6 +198,26 @@ RUN mkdir /tmp/go \
     && tar -C /usr/local -xzf go${GO_VERSION}.linux-amd64.tar.gz \
     && rm -rf /tmp/go
 
+### ELIXIR / ERLANG (via PPA) ###
+
+ARG ELIXIR_VERSION=1.17.3-1rmq1ppa1~ubuntu24.04.1
+ARG ERLANG_OTP_VERSION=1:26.2.5.4-1rmq1ppa1~ubuntu24.04.1
+ARG ERLANG_OTP_FLAVOR_VERSION=26.2.5.4
+
+RUN apt-get update && \
+    add-apt-repository ppa:rabbitmq/rabbitmq-erlang && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends \
+        elixir=${ELIXIR_VERSION} \
+        erlang-base=${ERLANG_OTP_VERSION} \
+        erlang-crypto=${ERLANG_OTP_VERSION} \
+        erlang-syntax-tools=${ERLANG_OTP_VERSION} \
+        erlang-ssl=${ERLANG_OTP_VERSION} \
+        erlang-public-key=${ERLANG_OTP_VERSION} \
+        erlang-asn1=${ERLANG_OTP_VERSION} \
+        erlang-dev \
+    && rm -rf /var/lib/apt/lists/*
+
 ### BAZEL ###
 
 RUN curl -L --fail https://github.com/bazelbuild/bazelisk/releases/download/v1.26.0/bazelisk-linux-amd64 -o /usr/local/bin/bazelisk \

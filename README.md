@@ -106,8 +106,3 @@ Nix-related environment variables can also be set as needed, such as:
 ```bash
 NIX_PATH=nixpkgs=./nixpkgs nix build
 ```
-
-### Automatic shell activation with direnv
-
-If you use [direnv](https://direnv.net/) the development shell can be loaded automatically. Run `direnv allow` once in this directory to trust the `.envrc` file.
-

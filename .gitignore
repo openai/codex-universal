@@ -1,1 +1,7 @@
 .DS_Store
+
+# Nix build artifacts
+result*
+*.drv
+*.out
+*.narinfo

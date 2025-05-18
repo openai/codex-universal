@@ -11,6 +11,8 @@
       let
         pkgs = import nixpkgs { inherit system; };
 
+        nvm = pkgs.callPackage ./nvm.nix {};
+
         envPackages = with pkgs; [
           bashInteractive
           git
@@ -22,7 +24,10 @@
           rsync
           unzip
           zip
+          pyenv
+          pipx
           python311Full
+          nvm
           nodejs_22
           bun
           jdk21

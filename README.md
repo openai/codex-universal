@@ -2,7 +2,7 @@
 
 `codex-universal` is a reference implementation of the base Docker image available in [OpenAI Codex](http://platform.openai.com/docs/codex).
 
-This repository is intended to help developers cutomize environments in Codex, by providing a similar image that can be pulled and run locally. This is not an identical environment but should help for debugging and development.
+This repository is intended to help developers customize environments in Codex, by providing a similar image that can be pulled and run locally. This is not an identical environment but should help for debugging and development.
 
 For more details on environment setup, see [OpenAI Codex](http://platform.openai.com/docs/codex).
 
@@ -47,10 +47,15 @@ The following environment variables can be set to configure runtime installation
 
 In addition to the packages specified in the table above, the following packages are also installed:
 
+- `pyenv`
+- `pipx`
+- `nvm` (installed via the flake from the official git repo)
 - `ruby`: 3.2.3
 - `bun`: 1.2.10
 - `java`: 21
 - `bazelisk` / `bazel`
+
+The flake fetches `nvm` from the official Git repository, ensuring the expected version is available in the image.
 
 See [Dockerfile](Dockerfile) for the full details of installed packages.
 

@@ -83,8 +83,7 @@ A development shell with the required tools can be entered with:
 nix develop
 ```
 
-The shell sets `NIX_CONFIG="experimental-features = nix-command flakes"`,
-so the `nix-command` and `flakes` features are enabled by default.
+The shell sets `NIX_CONFIG="experimental-features = nix-command flakes"`, so the `nix-command` and `flakes` features are enabled by default.
 
 The repository's Nix flake produces a `flake.lock` file to pin dependencies.
 Make sure this file stays up to date. A workflow (`update-flake-lock.yml`)

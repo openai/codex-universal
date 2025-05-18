@@ -53,3 +53,26 @@ In addition to the packages specified in the table above, the following packages
 - `bazelisk` / `bazel`
 
 See [Dockerfile](Dockerfile) for the full details of installed packages.
+
+## Building with Nix
+
+You can build an equivalent image using [Nix](https://nixos.org/). The repository provides a Flake that produces a Docker image and a development shell. Ensure `nix` is installed with flakes enabled. To build the image:
+
+```bash
+nix build .#dockerImage
+```
+
+The resulting `result` symlink can be loaded with Docker:
+
+```bash
+docker load < result
+```
+
+A development shell with the required tools can be entered with:
+
+```bash
+nix develop
+```
+
+This shell enables the `nix-command` and `flakes` features by default.
+

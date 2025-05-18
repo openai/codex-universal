@@ -56,7 +56,7 @@ See [Dockerfile](Dockerfile) for the full details of installed packages.
 
 ## Building with Nix
 
-You can build an equivalent image using [Nix](https://nixos.org/). The repository provides a Flake that produces a Docker image and a development shell. Ensure `nix` is installed with flakes enabled.
+You can build an equivalent image using [Nix](https://nixos.org/). While the Dockerfile remains the primary way to build the container image, the repository also ships a Flake that offers a reproducible development environment. Ensure `nix` is installed with flakes enabled.
 
 The Flake lockfile `flake.lock` should be kept current. Run `nix flake lock` when dependencies change to update it.
 
@@ -84,4 +84,22 @@ so the `nix-command` and `flakes` features are enabled by default.
 The repository's Nix flake produces a `flake.lock` file to pin dependencies.
 Make sure this file stays up to date. A workflow (`update-flake-lock.yml`)
 is provided to automatically regenerate and commit `flake.lock`.
+
+### direnv integration
+
+The repository includes a `.envrc` file for [direnv](https://direnv.net/). After installing `direnv`, run `direnv allow` in the repository root. Each new shell will automatically enter the `nix develop` environment.
+
+### Customizing flake inputs
+
+`nix develop` and `nix build` support `--override-input` to use alternative flake sources. For example, to try a different `nixpkgs` revision:
+
+```bash
+nix develop --override-input nixpkgs github:NixOS/nixpkgs/nixos-unstable
+```
+
+Nix-related environment variables can also be set as needed, such as:
+
+```bash
+NIX_PATH=nixpkgs=./nixpkgs nix build
+```
 

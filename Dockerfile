@@ -221,6 +221,21 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/* \
     && bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
 
+
+### DOTNET ###
+
+ARG DOTNET_VERSION=9.0
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        dotnet-sdk-${DOTNET_VERSION} \
+        aspnetcore-runtime-${DOTNET_VERSION} \
+        dotnet-runtime-${DOTNET_VERSION} \
+    && rm -rf /var/lib/apt/lists/*
+
+ENV DOTNET_ROOT=/usr/share/dotnet
+ENV PATH=$DOTNET_ROOT:$PATH
+
+
 ### SETUP SCRIPTS ###
 
 COPY setup_universal.sh /opt/codex/setup_universal.sh

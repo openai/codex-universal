@@ -107,3 +107,22 @@ Nix-related environment variables can also be set as needed, such as:
 ```bash
 NIX_PATH=nixpkgs=./nixpkgs nix build
 ```
+
+## AI Assistant Guidance
+
+This repository includes an `AGENT.md` file that provides guidance for AI assistants working with the codebase. To integrate with different AI tools, you can create symlinks to this file:
+
+```bash
+# For tools expecting AGENTS.md
+ln -s AGENT.md AGENTS.md
+
+# For other common naming conventions
+ln -s AGENT.md AI.md
+ln -s AGENT.md ASSISTANT.md
+```
+
+The guidance file includes:
+- Project architecture overview
+- Common commands and workflows
+- Language version configuration details
+- Build process documentation

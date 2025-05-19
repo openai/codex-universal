@@ -6,6 +6,47 @@ This repository is intended to help developers customize environments in Codex, 
 
 For more details on environment setup, see [OpenAI Codex](http://platform.openai.com/docs/codex).
 
+## Development with nix-portable
+
+[nix-portable](https://github.com/DavHau/nix-portable) allows you to run Nix on any Linux system without root privileges or installation. This is the recommended approach for quick development and testing.
+
+### Using the development shell
+
+First, download and make nix-portable executable:
+
+```sh
+curl -L https://github.com/DavHau/nix-portable/releases/latest/download/nix-portable-$(uname -m) > ./nix-portable
+chmod +x ./nix-portable
+```
+
+Enter the development shell:
+
+```sh
+./nix-portable nix develop
+```
+
+The development shell includes:
+- Core Unix utilities (ls, grep, find, etc.)
+- Development tools (git, curl, jq, ripgrep, vim)
+- Language runtimes (Python 3.11, Node.js 22, Go 1.23, Rust, Ruby 3.2)
+- Language-specific tools (pyenv, pipx, poetry, ruff, yarn, pnpm)
+- Container tools (docker, docker-compose)
+
+### Building the Docker image
+
+You can build the Docker image using nix-portable:
+
+```sh
+# Build the Docker image
+./nix-portable nix build .#dockerImage
+
+# Load the image into Docker
+docker load < result
+
+# Run the loaded image
+docker run --rm -it codex-universal:latest
+```
+
 ## Usage
 
 The Docker image is available at:

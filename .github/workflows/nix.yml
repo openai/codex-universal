@@ -16,8 +16,11 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@v10
-      - name: Configure Nix cache
-        uses: DeterminateSystems/setup-nix-cache@v3
+      - name: Restore and save Nix store
+        uses: nix-community/cache-nix-action@v6
+        with:
+          primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock') }}
+          restore-prefixes-first-match: nix-${{ runner.os }}-
       - name: Build container image
         run: nix build .#dockerImage
       - name: Load image

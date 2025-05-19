@@ -22,11 +22,7 @@ if [ -n "${CODEX_ENV_PYTHON_VERSION}" ]; then
 fi
 
 if [ -n "${CODEX_ENV_NODE_VERSION}" ]; then
-    echo "# Node.js: ${CODEX_ENV_NODE_VERSION}"
-    nvm alias default "${CODEX_ENV_NODE_VERSION}"
-    nvm use "${CODEX_ENV_NODE_VERSION}"
-    corepack enable
-    corepack install -g yarn pnpm npm
+    echo "# Node.js version is pinned at build time via Nix (nodejs_22). To use a different version, rebuild the container with a different pinned version."
 fi
 
 if [ -n "${CODEX_ENV_RUST_VERSION}" ]; then

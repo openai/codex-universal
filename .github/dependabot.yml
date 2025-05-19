@@ -1,0 +1,10 @@
+version: 2
+updates:
+  # Note: Dependabot doesn't have native support for Nix flakes yet.
+  # We use GitHub Actions with DeterminateSystems/update-flake-lock instead.
+  # See .github/workflows/update-flake-lock.yml
+  
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"

@@ -1,0 +1,51 @@
+name: Check flake.lock
+
+on:
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  flake-lock-check:
+    name: Ensure flake.lock is up to date
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v10
+
+      - name: Restore and save Nix store cache
+        uses: nix-community/cache-nix-action@v6
+        with:
+          primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', 'flake.lock') }}
+          restore-prefixes-first-match: nix-${{ runner.os }}-
+
+      - name: Check flake.lock is up to date
+        id: check
+        run: |
+          echo "Checking if flake.lock is up to date..."
+          
+          # Save current flake.lock
+          cp flake.lock flake.lock.orig
+          
+          # Update the lock file
+          nix flake lock
+          
+          # Check if it changed
+          if diff -q flake.lock flake.lock.orig > /dev/null; then
+            echo "✅ flake.lock is up to date"
+          else
+            echo "❌ flake.lock is out of date"
+            echo "::error::flake.lock is out of date. The automated update workflow will create a PR shortly."
+            echo "::notice::You can manually update by running: nix flake lock"
+            
+            # Show what would change
+            echo "::group::Changes needed in flake.lock"
+            diff -u flake.lock.orig flake.lock || true
+            echo "::endgroup::"
+            
+            exit 1
+          fi

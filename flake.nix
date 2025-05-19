@@ -11,7 +11,7 @@
       let
         pkgs = import nixpkgs { inherit system; };
 
-        nvm = pkgs.callPackage ./nvm.nix {};
+        # removed nvm; Node.js version pinned via nodejs_22
 
         envPackages = with pkgs; [
           bashInteractive
@@ -27,7 +27,6 @@
           pyenv
           pipx
           python311Full
-          nvm
           nodejs_22
           bun
           jdk21

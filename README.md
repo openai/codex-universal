@@ -38,7 +38,7 @@ The following environment variables can be set to configure runtime installation
 | Environment variable       | Description                | Supported versions                               | Additional packages                                                  |
 | -------------------------- | -------------------------- | ------------------------------------------------ | -------------------------------------------------------------------- |
 | `CODEX_ENV_PYTHON_VERSION` | Python version to install  | `3.10`, `3.11.12`, `3.12`, `3.13`                | `pyenv`, `poetry`, `uv`, `ruff`, `black`, `mypy`, `pyright`, `isort` |
-| `CODEX_ENV_NODE_VERSION`   | Node.js version to install | `18`, `20`, `22`                                 | `corepack`, `yarn`, `pnpm`, `npm`                                    |
+| `CODEX_ENV_NODE_VERSION`   | Node.js version (info only)| Currently pinned to `22` in Nix build            | `corepack`, `yarn`, `pnpm`, `npm`                                    |
 | `CODEX_ENV_RUST_VERSION`   | Rust version to install    | `1.83.0`, `1.84.1`, `1.85.1`, `1.86.0`, `1.87.0` |                                                                      |
 | `CODEX_ENV_GO_VERSION`     | Go version to install      | `1.22.12`, `1.23.8`, `1.24.3`                    |                                                                      |
 | `CODEX_ENV_SWIFT_VERSION`  | Swift version to install   | `5.10`, `6.1`                                    |                                                                      |
@@ -49,13 +49,12 @@ In addition to the packages specified in the table above, the following packages
 
 - `pyenv`
 - `pipx`
-- `nvm` (installed via the flake from the official git repo)
 - `ruby`: 3.2.3
 - `bun`: 1.2.10
 - `java`: 21
 - `bazelisk` / `bazel`
 
-The flake fetches `nvm` from the official Git repository, ensuring the expected version is available in the image.
+Note: Node.js is now directly installed via Nix (version 22) rather than using `nvm`.
 
 See [Dockerfile](Dockerfile) for the full details of installed packages.
 
@@ -86,8 +85,10 @@ nix develop
 The shell sets `NIX_CONFIG="experimental-features = nix-command flakes"`, so the `nix-command` and `flakes` features are enabled by default.
 
 The repository's Nix flake produces a `flake.lock` file to pin dependencies.
-Make sure this file stays up to date. A workflow (`update-flake-lock.yml`)
-is provided to automatically regenerate and commit `flake.lock`.
+This file is automatically kept up to date through GitHub Actions:
+- A weekly workflow checks for updates and creates pull requests
+- Updates are triggered automatically when `flake.nix` changes
+- Pull requests are validated to ensure `flake.lock` is current
 
 ### direnv integration
 

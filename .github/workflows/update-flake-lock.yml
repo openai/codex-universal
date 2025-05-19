@@ -3,25 +3,48 @@ name: Update flake.lock
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 0 * * 0'
+    # Run weekly on Monday at midnight UTC
+    - cron: '0 0 * * 1'
+  push:
+    branches:
+      - main
+    paths:
+      - 'flake.nix'
+      - '**/*.nix'
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
   update-lock:
     runs-on: ubuntu-latest
+    # Only run on the main repository, not forks
+    if: github.repository_owner == 'gerred'
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@v10
-      - name: Configure Nix cache
-        uses: DeterminateSystems/setup-nix-cache@v3
-      - name: Update lock file
-        run: nix flake lock --commit-lock-file
-      - name: Commit changes
-        uses: stefanzweifel/git-auto-commit-action@v5
+        
+      - name: Restore and save Nix store
+        uses: nix-community/cache-nix-action@v6
         with:
-          commit_message: 'chore: update flake.lock'
+          primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock') }}
+          restore-prefixes-first-match: nix-${{ runner.os }}-
+          
+      - name: Update flake.lock
+        uses: DeterminateSystems/update-flake-lock@main
+        with:
+          pr-title: "chore: update flake.lock"
+          pr-labels: |
+            dependencies
+            automated
+          commit-msg: "chore: update flake.lock"
+          branch: automated/update-flake-lock
+          git-author-name: github-actions[bot]
+          git-author-email: github-actions[bot]@users.noreply.github.com
+          git-committer-name: github-actions[bot]
+          git-committer-email: github-actions[bot]@users.noreply.github.com

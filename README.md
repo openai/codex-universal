@@ -126,3 +126,5 @@ The guidance file includes:
 - Common commands and workflows
 - Language version configuration details
 - Build process documentation
+
+Refer to `AGENT.md` for the complete details.

@@ -3,6 +3,7 @@ name: Check flake.lock
 on:
   pull_request:
     branches: [ "main" ]
+  merge_group:
 
 jobs:
   flake-lock-check:

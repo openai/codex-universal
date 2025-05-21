@@ -98,7 +98,7 @@ RUN apt-get update && apt-get install -y pipx \
     && for pyv in $(ls ${PYENV_ROOT}/versions/); do \
         ${PYENV_ROOT}/versions/$pyv/bin/pip install --upgrade pip ruff black mypy pyright isort; \
     done
-# prevents context pollution and console ui hanging with progress bar overload
+# Reduce the verbosity of uv - impacts performance of stdout buffering
 ENV UV_NO_PROGRESS=1
 
 ### NODE ###

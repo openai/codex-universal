@@ -14,34 +14,38 @@ The Docker image is available at:
 docker pull ghcr.io/openai/codex-universal:latest
 ```
 
-The below script shows how can you approximate the `setup` environment in Codex:
+The below script shows how you can run the image locally:
 
 ```
 docker run --rm -it \
-    # See below for environment variable options.
-    -e CODEX_ENV_PYTHON_VERSION=3.12 \
-    -e CODEX_ENV_NODE_VERSION=20 \
-    -e CODEX_ENV_RUST_VERSION=1.87.0 \
-    -e CODEX_ENV_GO_VERSION=1.23.8 \
-    -e CODEX_ENV_SWIFT_VERSION=6.1 \
-    # Mount the current directory similar to how it would get cloned in.
     -v $(pwd):/workspace/$(basename $(pwd)) -w /workspace/$(basename $(pwd)) \
     ghcr.io/openai/codex-universal:latest
 ```
 
-`codex-universal` includes setup scripts that look for `CODEX_ENV_*` environment variables and configures the language version accordingly.
+To build the image with a specific language version, use the `--build-arg` flag with `docker build`. For example, to build with the latest supported Python version (3.13):
+
+```
+docker build --build-arg PYTHON_VERSION=3.13 -t myimage .
+```
+
+Or, to build with .NET 9.0:
+
+```
+docker build --build-arg DOTNET_VERSION=9.0 -t myimage .
+```
 
 ### Configuring language runtimes
 
-The following environment variables can be set to configure runtime installation. Note that a limited subset of versions are supported (indicated in the table below):
+The following build arguments can be set to configure which version is installed (see the Dockerfile for all options):
 
-| Environment variable       | Description                | Supported versions                               | Additional packages                                                  |
-| -------------------------- | -------------------------- | ------------------------------------------------ | -------------------------------------------------------------------- |
-| `CODEX_ENV_PYTHON_VERSION` | Python version to install  | `3.10`, `3.11.12`, `3.12`, `3.13`                | `pyenv`, `poetry`, `uv`, `ruff`, `black`, `mypy`, `pyright`, `isort` |
-| `CODEX_ENV_NODE_VERSION`   | Node.js version to install | `18`, `20`, `22`                                 | `corepack`, `yarn`, `pnpm`, `npm`                                    |
-| `CODEX_ENV_RUST_VERSION`   | Rust version to install    | `1.83.0`, `1.84.1`, `1.85.1`, `1.86.0`, `1.87.0` |                                                                      |
-| `CODEX_ENV_GO_VERSION`     | Go version to install      | `1.22.12`, `1.23.8`, `1.24.3`                    |                                                                      |
-| `CODEX_ENV_SWIFT_VERSION`  | Swift version to install   | `5.10`, `6.1`                                    |                                                                      |
+| Build argument      | Description                | Supported versions                               |
+| -------------------| -------------------------- | ------------------------------------------------ |
+| `PYTHON_VERSION`   | Python version to install  | `3.10`, `3.11.12`, `3.12`, `3.13`                |
+| `NODE_VERSION`     | Node.js version to install | `18`, `20`, `22`                                 |
+| `RUST_VERSION`     | Rust version to install    | `1.83.0`, `1.84.1`, `1.85.1`, `1.86.0`, `1.87.0` |
+| `GO_VERSION`       | Go version to install      | `1.22.12`, `1.23.8`, `1.24.3`                    |
+| `SWIFT_VERSION`    | Swift version to install   | `5.10`, `6.1`                                    |
+| `DOTNET_VERSION`   | .NET SDK version to install| `9.0`                                            |
 
 ## What's included
 
@@ -51,5 +55,6 @@ In addition to the packages specified in the table above, the following packages
 - `bun`: 1.2.10
 - `java`: 21
 - `bazelisk` / `bazel`
+- `dotnet`: 9.0
 
 See [Dockerfile](Dockerfile) for the full details of installed packages.

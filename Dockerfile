@@ -229,11 +229,11 @@ ENV PATH=$DOTNET_ROOT:$PATH
 RUN apt-get update && apt-get install -y --no-install-recommends wget \
     && wget https://dot.net/v1/dotnet-install.sh -O /tmp/dotnet-install.sh \
     && chmod +x /tmp/dotnet-install.sh \
-    && /tmp/dotnet-install.sh --channel "$DOTNET_VERSION" --install-dir "$DOTNET_ROOT" \
+    && /tmp/dotnet-install.sh --channel "$DOTNET_VERSION" --install-dir "$DOTNET_ROOT" --arch arm64 \
     && rm /tmp/dotnet-install.sh \
     && echo 'export DOTNET_ROOT=/root/.dotnet' >> /etc/profile \
     && echo 'export PATH=/root/.dotnet:$PATH' >> /etc/profile \
-    && dotnet --version
+    && $DOTNET_ROOT/dotnet --version
 ### SETUP SCRIPTS ###
 
 COPY setup_universal.sh /opt/codex/setup_universal.sh

@@ -22,7 +22,13 @@ docker run --rm -it \
     ghcr.io/openai/codex-universal:latest
 ```
 
-To build the image with a specific language version, use the `--build-arg` flag with `docker build`. For example, to build with .NET 9.0:
+To build the image with a specific language version, use the `--build-arg` flag with `docker build`. For example, to build with the latest supported Python version (3.13):
+
+```
+docker build --build-arg PYTHON_VERSION=3.13 -t myimage .
+```
+
+Or, to build with .NET 9.0:
 
 ```
 docker build --build-arg DOTNET_VERSION=9.0 -t myimage .

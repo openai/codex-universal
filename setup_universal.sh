@@ -7,6 +7,8 @@ CODEX_ENV_NODE_VERSION=${CODEX_ENV_NODE_VERSION:-}
 CODEX_ENV_RUST_VERSION=${CODEX_ENV_RUST_VERSION:-}
 CODEX_ENV_GO_VERSION=${CODEX_ENV_GO_VERSION:-}
 CODEX_ENV_SWIFT_VERSION=${CODEX_ENV_SWIFT_VERSION:-}
+CODEX_ENV_ERLANG_VERSION=${CODEX_ENV_ERLANG_VERSION:-}
+CODEX_ENV_ELIXIR_VERSION=${CODEX_ENV_ELIXIR_VERSION:-}
 
 echo "Configuring language runtimes..."
 
@@ -58,5 +60,30 @@ if [ -n "${CODEX_ENV_SWIFT_VERSION}" ]; then
     echo "# Swift: ${CODEX_ENV_SWIFT_VERSION} (default: ${current})"
     if [ "${current}" != "${CODEX_ENV_SWIFT_VERSION}" ]; then
         swiftly install --use "${CODEX_ENV_SWIFT_VERSION}"
+    fi
+fi
+
+if [ -n "${CODEX_ENV_ERLANG_VERSION}" ]; then
+    # Activate mise for this shell session
+    eval "$(~/.local/bin/mise activate bash)"
+    current=$(mise current erlang 2>/dev/null || echo "none")
+    echo "# Erlang: ${CODEX_ENV_ERLANG_VERSION} (default: ${current})"
+    if [ "${current}" != "${CODEX_ENV_ERLANG_VERSION}" ]; then
+        mise install erlang@"${CODEX_ENV_ERLANG_VERSION}"
+        mise use --global erlang@"${CODEX_ENV_ERLANG_VERSION}"
+    fi
+fi
+
+if [ -n "${CODEX_ENV_ELIXIR_VERSION}" ]; then
+    # Activate mise for this shell session
+    eval "$(~/.local/bin/mise activate bash)"
+    current=$(mise current elixir 2>/dev/null | cut -d'-' -f1 || echo "none")
+    echo "# Elixir: ${CODEX_ENV_ELIXIR_VERSION} (default: ${current})"
+    if [ "${current}" != "${CODEX_ENV_ELIXIR_VERSION}" ]; then
+        # Determine OTP version for Elixir installation
+        erlang_version=$(mise current erlang 2>/dev/null || echo "27")
+        otp_version=$(echo "$erlang_version" | cut -d'.' -f1)
+        mise install elixir@"${CODEX_ENV_ELIXIR_VERSION}"-otp-"${otp_version}"
+        mise use --global elixir@"${CODEX_ENV_ELIXIR_VERSION}"-otp-"${otp_version}"
     fi
 fi

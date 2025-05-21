@@ -221,6 +221,39 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/* \
     && bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
 
+### MISE (for Elixir/Erlang) ###
+
+ARG ERLANG_VERSION=27.1.2
+ARG ELIXIR_VERSION=1.18.3
+
+ENV MISE_DATA_DIR=/root/.local/share/mise
+ENV PATH=/root/.local/bin:$PATH
+
+# Install mise, then Erlang dependencies and Erlang/Elixir
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        autoconf \
+        automake \
+        libtool \
+        libwxgtk3.2-dev \
+        libgl1-mesa-dev \
+        libglu1-mesa-dev \
+        libpng-dev \
+        libssh-dev \
+        libncurses5-dev \
+        libodbc2 \
+        unixodbc-dev \
+    && rm -rf /var/lib/apt/lists/* \
+    && curl https://mise.run | sh \
+    && echo 'eval "$(~/.local/bin/mise activate bash)"' >> /etc/profile
+
+# Install Erlang and Elixir with mise in a bash shell
+RUN bash -c 'eval "$(~/.local/bin/mise activate bash)" \
+    && mise install erlang@${ERLANG_VERSION} \
+    && mise use --global erlang@${ERLANG_VERSION} \
+    && eval "$(~/.local/bin/mise activate bash)" \
+    && mise install elixir@${ELIXIR_VERSION}-otp-27 \
+    && mise use --global elixir@${ELIXIR_VERSION}-otp-27'
+
 ### SETUP SCRIPTS ###
 
 COPY setup_universal.sh /opt/codex/setup_universal.sh

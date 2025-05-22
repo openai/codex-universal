@@ -16,15 +16,15 @@ docker pull ghcr.io/openai/codex-universal:latest
 
 The below script shows how can you approximate the `setup` environment in Codex:
 
-```
+```sh
+# See below for environment variable options.
+# This script mounts the current directory similar to how it would get cloned in.
 docker run --rm -it \
-    # See below for environment variable options.
     -e CODEX_ENV_PYTHON_VERSION=3.12 \
     -e CODEX_ENV_NODE_VERSION=20 \
     -e CODEX_ENV_RUST_VERSION=1.87.0 \
     -e CODEX_ENV_GO_VERSION=1.23.8 \
     -e CODEX_ENV_SWIFT_VERSION=6.1 \
-    # Mount the current directory similar to how it would get cloned in.
     -v $(pwd):/workspace/$(basename $(pwd)) -w /workspace/$(basename $(pwd)) \
     ghcr.io/openai/codex-universal:latest
 ```

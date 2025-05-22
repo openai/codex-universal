@@ -24,6 +24,7 @@ docker run --rm -it \
     -e CODEX_ENV_RUST_VERSION=1.87.0 \
     -e CODEX_ENV_GO_VERSION=1.23.8 \
     -e CODEX_ENV_SWIFT_VERSION=6.1 \
+    -e CODEX_ENV_PHP_VERSION=8.4 \
     # Mount the current directory similar to how it would get cloned in.
     -v $(pwd):/workspace/$(basename $(pwd)) -w /workspace/$(basename $(pwd)) \
     ghcr.io/openai/codex-universal:latest
@@ -42,6 +43,7 @@ The following environment variables can be set to configure runtime installation
 | `CODEX_ENV_RUST_VERSION`   | Rust version to install    | `1.83.0`, `1.84.1`, `1.85.1`, `1.86.0`, `1.87.0` |                                                                      |
 | `CODEX_ENV_GO_VERSION`     | Go version to install      | `1.22.12`, `1.23.8`, `1.24.3`                    |                                                                      |
 | `CODEX_ENV_SWIFT_VERSION`  | Swift version to install   | `5.10`, `6.1`                                    |                                                                      |
+| `CODEX_ENV_PHP_VERSION`    | PHP version to install     | `8.2`, `8.3`, `8.4`,                             | `composer`                                                           |
 
 ## What's included
 

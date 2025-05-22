@@ -96,7 +96,7 @@ RUN apt-get update && apt-get install -y pipx \
     && pipx install poetry uv \
     # Preinstall common packages for each version
     && for pyv in $(ls ${PYENV_ROOT}/versions/); do \
-        ${PYENV_ROOT}/versions/$pyv/bin/pip install --upgrade pip ruff black mypy pyright isort; \
+        ${PYENV_ROOT}/versions/$pyv/bin/pip install --no-cache-dir --upgrade pip ruff black mypy pyright isort; \
     done
 # Reduce the verbosity of uv - impacts performance of stdout buffering
 ENV UV_NO_PROGRESS=1

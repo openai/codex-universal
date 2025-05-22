@@ -126,7 +126,7 @@ RUN git -c advice.detachedHead=0 clone --branch ${NVM_VERSION} --depth 1 https:/
 
 ### BUN ###
 
-ARG BUN_VERSION=1.2.10
+ARG BUN_VERSION=1.2.14
 
 ENV BUN_INSTALL=/root/.bun
 ENV PATH="$BUN_INSTALL/bin:$PATH"

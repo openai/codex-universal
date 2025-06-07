@@ -222,6 +222,22 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/* \
     && bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
 
+### NIX ###
+
+ARG NIX_VERSION=2.24.11
+
+# Install Nix package manager
+# Note: Using single-user installation for simplicity in container environment
+ENV USER=root
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        xz-utils \
+    && rm -rf /var/lib/apt/lists/* \
+    && curl -L https://nixos.org/nix/install | sh -s -- --no-daemon \
+    && echo '. /root/.nix-profile/etc/profile.d/nix.sh' >> /etc/profile \
+    && . /root/.nix-profile/etc/profile.d/nix.sh \
+    && nix-channel --update \
+    && nix-env -iA nixpkgs.nixfmt-classic nixpkgs.nil
+
 ### SETUP SCRIPTS ###
 
 COPY setup_universal.sh /opt/codex/setup_universal.sh

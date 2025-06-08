@@ -222,6 +222,26 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/* \
     && bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
 
+### NIX ###
+
+ARG NIX_VERSION=2.24.11
+
+# Install Nix package manager
+# Note: Using single-user installation for simplicity in container environment
+ENV USER=root
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        xz-utils \
+    && rm -rf /var/lib/apt/lists/* \
+    && groupadd -r nixbld \
+    && for n in $(seq 1 10); do useradd -c "Nix build user $n" -d /var/empty -g nixbld -G nixbld -M -N -r -s "$(command -v nologin)" "nixbld$n"; done \
+    && mkdir -m 0755 /nix && chown root /nix \
+    && curl -L https://nixos.org/nix/install | bash -s - --no-daemon \
+    && echo '. /root/.nix-profile/etc/profile.d/nix.sh' >> /etc/profile \
+    && . /root/.nix-profile/etc/profile.d/nix.sh \
+    && nix-channel --add https://nixos.org/channels/nixos-unstable nixpkgs \
+    && nix-channel --update \
+    && nix-env -iA nixpkgs.nixfmt-classic nixpkgs.nil
+
 ### SETUP SCRIPTS ###
 
 COPY setup_universal.sh /opt/codex/setup_universal.sh

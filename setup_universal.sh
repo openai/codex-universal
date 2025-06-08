@@ -7,6 +7,7 @@ CODEX_ENV_NODE_VERSION=${CODEX_ENV_NODE_VERSION:-}
 CODEX_ENV_RUST_VERSION=${CODEX_ENV_RUST_VERSION:-}
 CODEX_ENV_GO_VERSION=${CODEX_ENV_GO_VERSION:-}
 CODEX_ENV_SWIFT_VERSION=${CODEX_ENV_SWIFT_VERSION:-}
+CODEX_ENV_NIX_CHANNEL=${CODEX_ENV_NIX_CHANNEL:-}
 
 echo "Configuring language runtimes..."
 
@@ -58,5 +59,17 @@ if [ -n "${CODEX_ENV_SWIFT_VERSION}" ]; then
     echo "# Swift: ${CODEX_ENV_SWIFT_VERSION} (default: ${current})"
     if [ "${current}" != "${CODEX_ENV_SWIFT_VERSION}" ]; then
         swiftly install --use "${CODEX_ENV_SWIFT_VERSION}"
+    fi
+fi
+
+if [ -n "${CODEX_ENV_NIX_CHANNEL}" ]; then
+    source /root/.nix-profile/etc/profile.d/nix.sh
+    current=$(nix-channel --list | grep nixpkgs | awk '{print $2}' | sed 's|https://nixos.org/channels/||')   # ==> nixos-unstable
+    echo "# Nix: ${CODEX_ENV_NIX_CHANNEL} (default: ${current})"
+    if [ "${current}" != "${CODEX_ENV_NIX_CHANNEL}" ]; then
+        nix-channel --add "https://nixos.org/channels/${CODEX_ENV_NIX_CHANNEL}" nixpkgs
+        nix-channel --update
+        # Re-install common Nix development tools for the new channel
+        nix-env -iA nixpkgs.nixfmt-classic nixpkgs.nil
     fi
 fi

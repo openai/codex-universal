@@ -81,7 +81,7 @@ ARG PYTHON_VERSION=3.11.12
 # Install pyenv
 ENV PYENV_ROOT=/root/.pyenv
 ENV PATH=$PYENV_ROOT/bin:$PATH
-RUN git -c advice.detachedHead=0 clone --branch ${PYENV_VERSION} --depth 1 https://github.com/pyenv/pyenv.git "${PYENV_ROOT}" \
+RUN test -n "${PYTHON_VERSION}" && git -c advice.detachedHead=0 clone --branch ${PYENV_VERSION} --depth 1 https://github.com/pyenv/pyenv.git "${PYENV_ROOT}" \
     && echo 'export PYENV_ROOT="$HOME/.pyenv"' >> /etc/profile \
     && echo 'export PATH="$$PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH"' >> /etc/profile \
     && echo 'eval "$(pyenv init - bash)"' >> /etc/profile \
@@ -113,7 +113,7 @@ ENV COREPACK_DEFAULT_TO_LATEST=0
 ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
 ENV COREPACK_ENABLE_AUTO_PIN=0
 ENV COREPACK_ENABLE_STRICT=0
-RUN git -c advice.detachedHead=0 clone --branch ${NVM_VERSION} --depth 1 https://github.com/nvm-sh/nvm.git "${NVM_DIR}" \
+RUN test -n "${NODE_VERSION}" && git -c advice.detachedHead=0 clone --branch ${NVM_VERSION} --depth 1 https://github.com/nvm-sh/nvm.git "${NVM_DIR}" \
     && echo 'source $NVM_DIR/nvm.sh' >> /etc/profile \
     && echo "prettier\neslint\ntypescript" > $NVM_DIR/default-packages \
     && . $NVM_DIR/nvm.sh \
@@ -131,7 +131,7 @@ ARG BUN_VERSION=1.2.14
 ENV BUN_INSTALL=/root/.bun
 ENV PATH="$BUN_INSTALL/bin:$PATH"
 
-RUN mkdir -p "$BUN_INSTALL/bin" \
+RUN test -n "${BUN_VERSION}" && mkdir -p "$BUN_INSTALL/bin" \
     && curl -L --fail "https://github.com/oven-sh/bun/releases/download/bun-v${BUN_VERSION}/bun-linux-x64-baseline.zip" \
         -o /tmp/bun.zip \
     && unzip -q /tmp/bun.zip -d "$BUN_INSTALL/bin" \
@@ -148,7 +148,7 @@ ARG GRADLE_VERSION=8.14
 ARG GRADLE_DOWNLOAD_SHA256=61ad310d3c7d3e5da131b76bbf22b5a4c0786e9d892dae8c1658d4b484de3caa
 
 ENV GRADLE_HOME=/opt/gradle
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN test -n "${GRADLE_VERSION}" && apt-get update && apt-get install -y --no-install-recommends \
         openjdk-${JAVA_VERSION}-jdk \
     && rm -rf /var/lib/apt/lists/* \
     && curl -LO "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip" \
@@ -192,7 +192,7 @@ ARG GO_DOWNLOAD_SHA256=45b87381172a58d62c977f27c4683c8681ef36580abecd14fd124d24c
 
 # Go defaults GOROOT to /usr/local/go - we just need to update PATH
 ENV PATH=/usr/local/go/bin:$HOME/go/bin:$PATH
-RUN mkdir /tmp/go \
+RUN test -n "${GO_VERSION}" && mkdir /tmp/go \
     && cd /tmp/go \
     && curl -O https://dl.google.com/go/go${GO_VERSION}.linux-amd64.tar.gz \
     && echo "${GO_DOWNLOAD_SHA256} *go${GO_VERSION}.linux-amd64.tar.gz" | sha256sum --check - \

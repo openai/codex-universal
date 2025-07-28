@@ -1,0 +1,117 @@
+/* Basic body styles */
+body {
+    font-family: sans-serif;
+    margin: 0;
+}
+
+/* FAB Container */
+.fabs-container {
+    position: fixed;
+    bottom: 25px;
+    right: 15px;
+    z-index: 1000;
+}
+
+/* FAB Icon */
+.fabs-icon {
+    width: 60px;
+    height: 60px;
+    background-color: #007bff;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.25);
+    transition: transform 0.2s;
+}
+
+.fabs-icon:hover {
+    transform: scale(1.1);
+}
+
+.fabs-icon i {
+    font-size: 24px;
+}
+
+/* FAB Menu */
+.fabs-menu {
+    position: absolute;
+    bottom: 70px;
+    right: 0;
+    width: 0;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    overflow: hidden;
+    transition: width 0.3s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.fabs-container.open .fabs-menu {
+    width: 90vw;
+}
+
+/* FAB Menu Items */
+.fabs-item {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    color: #333;
+    text-decoration: none;
+    width: 100%;
+    box-sizing: border-box;
+    border-bottom: 1px solid #eee;
+}
+
+.fabs-item:last-child {
+    border-bottom: none;
+}
+
+.fabs-item i {
+    margin-right: 15px;
+    font-size: 20px;
+}
+
+/* Services Accordion */
+.services-submenu {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    padding-left: 30px;
+    box-sizing: border-box;
+}
+
+.services-accordion.open .services-submenu {
+    display: flex;
+}
+
+/* Language and Theme Toggles */
+.lang-toggle a, .theme-toggle a {
+    text-decoration: none;
+    color: #007bff;
+    font-weight: bold;
+}
+
+/* Dark Theme */
+html[data-theme="dark"] body {
+    background-color: #333;
+    color: white;
+}
+
+html[data-theme="dark"] .fabs-menu {
+    background-color: #444;
+}
+
+html[data-theme="dark"] .fabs-item {
+    color: white;
+    border-bottom-color: #555;
+}
+
+html[data-theme="dark"] .lang-toggle a,
+html[data-theme="dark"] .theme-toggle a {
+    color: #58a6ff;
+}

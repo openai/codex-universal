@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile FAB Menu</title>
+    <link rel="stylesheet" href="../css/min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body>
+
+    <div class="fabs-container">
+        <div class="fabs-icon">
+            <i class="fa fa-plus"></i>
+        </div>
+        <div class="fabs-menu">
+            <a href="../index.html" class="fabs-item"><i class="fa fa-home"></i> Home</a>
+            <div class="fabs-item services-accordion">
+                <a href="#"><i class="fa fa-concierge-bell"></i> Services</a>
+                <div class="services-submenu">
+                    <a href="../mainnav/opera.html">Opera</a>
+                    <a href="../mainnav/center.html">Center</a>
+                    <a href="../mainnav/it.html">IT</a>
+                    <a href="../mainnav/pros.html">Pros</a>
+                </div>
+            </div>
+            <div class="fabs-item lang-toggle">
+                <a href="#" data-lang="en">EN</a> / <a href="#" data-lang="es">ES</a>
+            </div>
+            <div class="fabs-item theme-toggle">
+                <a href="#" data-theme="light"><i class="fa fa-sun-o"></i></a> / <a href="#" data-theme="dark"><i class="fa fa-moon-o"></i></a>
+            </div>
+            <a href="#" class="fabs-item"><i class="fa fa-comment"></i> Chatbot</a>
+            <a href="#" class="fabs-item"><i class="fa fa-user-plus"></i> Join Us</a>
+            <a href="#" class="fabs-item"><i class="fa fa-envelope"></i> Contact Us</a>
+        </div>
+    </div>
+
+<script>
+    const fabIcon = document.querySelector('.fabs-icon');
+    const fabContainer = document.querySelector('.fabs-container');
+
+    fabIcon.addEventListener('click', () => {
+        fabContainer.classList.toggle('open');
+    });
+
+    const servicesAccordion = document.querySelector('.services-accordion');
+    servicesAccordion.addEventListener('click', (e) => {
+        e.preventDefault();
+        servicesAccordion.classList.toggle('open');
+    });
+
+    const langToggle = document.querySelector('.lang-toggle');
+    langToggle.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (e.target.tagName === 'A') {
+            document.documentElement.lang = e.target.dataset.lang;
+        }
+    });
+
+    const themeToggle = document.querySelector('.theme-toggle');
+    themeToggle.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (e.target.tagName === 'A' || e.target.tagName === 'I') {
+            const theme = e.target.closest('a').dataset.theme;
+            document.documentElement.dataset.theme = theme;
+        }
+    });
+</script>
+</body>
+</html>

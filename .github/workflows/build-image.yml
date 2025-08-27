@@ -47,6 +47,8 @@ jobs:
         cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache,mode=max,compression=zstd,oci-mediatypes=true
         provenance: false
         sbom: false
+        secrets: |
+          GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
 
     - name: Build and push (arm64)
       uses: docker/build-push-action@v6
@@ -58,6 +60,8 @@ jobs:
         cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache,mode=max,compression=zstd,oci-mediatypes=true
         provenance: false
         sbom: false
+        secrets: |
+          GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
     
     - name: Generate artifact attestation
       uses: actions/attest-build-provenance@v2

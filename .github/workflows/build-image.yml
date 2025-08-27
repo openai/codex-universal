@@ -31,7 +31,7 @@ jobs:
       run: |
         sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
         sudo docker image prune --all --force
-        sudo docker builder prune -a
+        sudo docker builder prune -af
     - run: df -h
 
     - name: Checkout
@@ -58,8 +58,8 @@ jobs:
         platforms: linux/amd64
         push: ${{ github.event_name == 'push' }}
         tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:amd64-${{ github.sha }}
-        cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache
-        cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache,mode=max,compression=zstd,oci-mediatypes=true
+        cache-from: type=gha,scope=${{ github.workflow }}-${{ runner.os }}-amd64
+        cache-to:   type=gha,mode=min,scope=${{ github.workflow }}-${{ runner.os }}-amd64
         provenance: false
         sbom: false
         secrets: |
@@ -72,8 +72,8 @@ jobs:
         platforms: linux/arm64
         push: ${{ github.event_name == 'push' }}
         tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:arm64-${{ github.sha }}
-        cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache
-        cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache,mode=max,compression=zstd,oci-mediatypes=true
+        cache-from: type=gha,scope=${{ github.workflow }}-${{ runner.os }}-arm64
+        cache-to:   type=gha,mode=min,scope=${{ github.workflow }}-${{ runner.os }}-arm64
         provenance: false
         sbom: false
         secrets: |

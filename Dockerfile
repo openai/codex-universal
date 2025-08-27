@@ -2,12 +2,12 @@ FROM ubuntu:24.04
 
 ENV LANG="C.UTF-8"
 ENV HOME=/root
+ENV DEBIAN_FRONTEND=noninteractive
 
 ### BASE ###
 
 RUN apt-get update \
-    && apt-get upgrade -y \
-    && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    && apt-get install -y --no-install-recommends \
         binutils=2.42-* \
         sudo=1.9.* \
         build-essential=12.10* \
@@ -18,7 +18,7 @@ RUN apt-get update \
         gettext=0.21-* \
         git=1:2.43.* \
         git-lfs=3.4.* \
-        gnupg2=2.4.* \
+        gnupg=2.4.* \
         inotify-tools=3.22.* \
         iputils-ping=3:20240117-* \
         jq=1.7.* \
@@ -75,10 +75,14 @@ RUN apt-get update \
 
 ### MISE ###
 
-RUN install -dm 755 /etc/apt/keyrings \
-    && curl -fsSL https://mise.jdx.dev/gpg-key.pub | gpg --dearmor | tee /etc/apt/keyrings/mise-archive-keyring.gpg 1> /dev/null \
-    && echo "deb [signed-by=/etc/apt/keyrings/mise-archive-keyring.gpg] https://mise.jdx.dev/deb stable main" | tee /etc/apt/sources.list.d/mise.list \
-    && apt-get update && apt-get install -y --no-install-recommends mise/stable \
+RUN install -dm 0755 /etc/apt/keyrings \
+    && curl -fsSL https://mise.jdx.dev/gpg-key.pub \
+       | gpg --batch --yes --dearmor -o /etc/apt/keyrings/mise-archive-keyring.gpg \
+    && chmod 0644 /etc/apt/keyrings/mise-archive-keyring.gpg \
+    && echo "deb [signed-by=/etc/apt/keyrings/mise-archive-keyring.gpg] https://mise.jdx.dev/deb stable main" \
+       > /etc/apt/sources.list.d/mise.list \
+    && apt-get update \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends mise/stable \
     && rm -rf /var/lib/apt/lists/* \
     && echo 'eval "$(mise activate bash)"' >> /etc/profile \
     && mise settings set experimental true \
@@ -89,17 +93,16 @@ ENV PATH=$HOME/.local/share/mise/shims:$PATH
 
 ### LLVM ###
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-        cmake=3.28.* \
-        ccache=4.9.* \
-        ninja-build=1.11.* \
-        nasm=2.16.* \
-        yasm=1.3.* \
-        gawk=1:5.2.* \
-        lsb-release=12.0-* \
-        gnupg=2.4.* \
-    && rm -rf /var/lib/apt/lists/* \
-    && bash -c "$(curl -fsSL https://apt.llvm.org/llvm.sh)"
+RUN install -dm 0755 /etc/apt/keyrings \
+    && curl -fsSL https://apt.llvm.org/llvm-snapshot.gpg.key \
+       | gpg --batch --yes --dearmor -o /etc/apt/keyrings/llvm.gpg \
+    && chmod 0644 /etc/apt/keyrings/llvm.gpg \
+    && . /etc/os-release \
+    && echo "deb [signed-by=/etc/apt/keyrings/llvm.gpg] https://apt.llvm.org/${VERSION_CODENAME}/ llvm-toolchain-${VERSION_CODENAME}-20 main" \
+       > /etc/apt/sources.list.d/llvm.list \
+    && apt-get update \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends clang-20 lld-20 lldb-20 llvm-20 \
+    && rm -rf /var/lib/apt/lists/*
 
 ### PYTHON ###
 
@@ -110,7 +113,6 @@ ARG PYTHON_VERSION=3.11.12
 ENV PYENV_ROOT=/root/.pyenv
 ENV PATH=$PYENV_ROOT/bin:$PATH
 ENV PYTHON_VERSIONS="3.10 3.11.12 3.12 3.13"
-# hadolint ignore=SC2016,DL3003
 RUN git -c advice.detachedHead=0 clone --branch "$PYENV_VERSION" --depth 1 https://github.com/pyenv/pyenv.git "$PYENV_ROOT" \
     && echo 'export PYENV_ROOT="$HOME/.pyenv"' >> /etc/profile \
     && echo 'export PATH="$$PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH"' >> /etc/profile \
@@ -118,7 +120,8 @@ RUN git -c advice.detachedHead=0 clone --branch "$PYENV_VERSION" --depth 1 https
     && cd "$PYENV_ROOT" && src/configure && make -C src \
     && pyenv install $PYTHON_VERSIONS \
     && pyenv global "$PYTHON_VERSION"
-# Install pipx for common global package managers (e.g. poetry)
+
+    # Install pipx for common global package managers (e.g. poetry)
 ENV PIPX_BIN_DIR=/root/.local/bin
 ENV PATH=$PIPX_BIN_DIR:$PATH
 RUN apt-get update && apt-get install -y --no-install-recommends pipx=1.4.* \
@@ -144,7 +147,7 @@ ENV COREPACK_DEFAULT_TO_LATEST=0
 ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
 ENV COREPACK_ENABLE_AUTO_PIN=0
 ENV COREPACK_ENABLE_STRICT=0
-# hadolint ignore=SC1091
+
 RUN git -c advice.detachedHead=0 clone --branch "$NVM_VERSION" --depth 1 https://github.com/nvm-sh/nvm.git "$NVM_DIR" \
     && echo 'source $NVM_DIR/nvm.sh' >> /etc/profile \
     && echo "prettier\neslint\ntypescript" > $NVM_DIR/default-packages \
@@ -176,17 +179,6 @@ ARG SWIFT_VERSIONS="6.1 5.10.1"
 RUN for v in $SWIFT_VERSIONS; do mise install "swift@${v}"; done \
     && mise use --global "swift@${SWIFT_VERSIONS%% *}"
 
-### RUBY ###
-
-ARG RUBY_VERSIONS="3.2.3 3.3.8 3.4.4"
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libyaml-dev=0.2.* \
-    libgmp-dev=2:6.3.* \
-    rustc=1.75.* \
-    && rm -rf /var/lib/apt/lists/* \
-    && for v in $RUBY_VERSIONS; do mise install "ruby@${v}"; done \
-    && mise use --global "ruby@${RUBY_VERSIONS%% *}"
-
 ### RUST ###
 
 ARG RUST_VERSIONS="1.89.0 1.88.0 1.87.0 1.86.0 1.85.1 1.84.1 1.83.0"
@@ -195,6 +187,17 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y \
     && echo 'source $HOME/.cargo/env' >> /etc/profile \
     && rustup install $RUST_VERSIONS \
     && rustup default ${RUST_VERSIONS%% *}
+
+
+### RUBY ###
+
+ARG RUBY_VERSIONS="3.2.3 3.3.8 3.4.4"
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libyaml-dev=0.2.* \
+    libgmp-dev=2:6.3.* \
+    && rm -rf /var/lib/apt/lists/* \
+    && for v in $RUBY_VERSIONS; do mise install "ruby@${v}"; done \
+    && mise use --global "ruby@${RUBY_VERSIONS%% *}"
 
 ### C++ ###
 # gcc is already installed via apt-get above, so these are just additional linters, etc.

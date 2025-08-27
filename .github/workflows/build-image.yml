@@ -25,24 +25,39 @@ jobs:
       attestations: write
       id-token: write
     steps:
-    - uses: actions/checkout@v4
+    # Disk cleanup
+    - run: df -h
+    - name: "disk-cleanup"
+      run: |
+        sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+        sudo docker image prune --all --force
+        sudo docker builder prune -a
+    - run: df -h
+
+    - name: Checkout
+      uses: actions/checkout@v4
+
     - name: Log in to ghcr.io
-      uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
+      uses: docker/login-action@v3
       with:
         registry: ${{ env.REGISTRY }}
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
+
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v3
+
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
-    
+
+    # Build & push per-arch under SHA-suffixed tags to avoid a single-arch :latest window
     - name: Build and push (amd64)
+      id: build_amd64
       uses: docker/build-push-action@v6
       with:
         platforms: linux/amd64
         push: ${{ github.event_name == 'push' }}
-        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:amd64-${{ github.sha }}
         cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache
         cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache,mode=max,compression=zstd,oci-mediatypes=true
         provenance: false
@@ -51,22 +66,40 @@ jobs:
           GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
 
     - name: Build and push (arm64)
+      id: build_arm64
       uses: docker/build-push-action@v6
       with:
         platforms: linux/arm64
         push: ${{ github.event_name == 'push' }}
-        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:arm64-${{ github.sha }}
         cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache
         cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache,mode=max,compression=zstd,oci-mediatypes=true
         provenance: false
         sbom: false
         secrets: |
           GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
-    
+
+    # Create a multi-arch manifest for :latest and :{sha}
+    - name: Create multi-arch manifest
+      if: ${{ github.event_name == 'push' }}
+      run: |
+        docker buildx imagetools create \
+          -t "$REGISTRY/$IMAGE_NAME:latest" \
+          -t "$REGISTRY/$IMAGE_NAME:${GITHUB_SHA}" \
+          "$REGISTRY/$IMAGE_NAME@${{ steps.build_amd64.outputs.digest }}" \
+          "$REGISTRY/$IMAGE_NAME@${{ steps.build_arm64.outputs.digest }}"
+
+    - name: Get manifest digest
+      id: manifest_digest
+      if: ${{ github.event_name == 'push' }}
+      run: |
+        DIGEST=$(docker buildx imagetools inspect "$REGISTRY/$IMAGE_NAME:latest" | awk '/^Digest:/{print $2; exit}')
+        echo "digest=$DIGEST" >> "$GITHUB_OUTPUT"
+
     - name: Generate artifact attestation
       uses: actions/attest-build-provenance@v2
       if: ${{ github.event_name == 'push' }}
       with:
         push-to-registry: true
         subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-        subject-digest: ${{ steps.docker_build.outputs.digest }}
+        subject-digest: ${{ steps.manifest_digest.outputs.digest }}

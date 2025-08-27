@@ -37,15 +37,31 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
     
-    - name: Build and push
-      id: docker_build
+    - name: Build and push (amd64)
       uses: docker/build-push-action@v6
       with:
-        platforms: linux/amd64,linux/arm64
+        platforms: linux/amd64
         push: ${{ github.event_name == 'push' }}
         tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
+        cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache
+        cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache,mode=max,compression=zstd,oci-mediatypes=true
+        provenance: false
+        sbom: false
+        secrets: |
+          GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build and push (arm64)
+      uses: docker/build-push-action@v6
+      with:
+        platforms: linux/arm64
+        push: ${{ github.event_name == 'push' }}
+        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+        cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache
+        cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache,mode=max,compression=zstd,oci-mediatypes=true
+        provenance: false
+        sbom: false
+        secrets: |
+          GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
     
     - name: Generate artifact attestation
       uses: actions/attest-build-provenance@v2

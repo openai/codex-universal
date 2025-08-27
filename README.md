@@ -14,6 +14,9 @@ The Docker image is available at:
 docker pull ghcr.io/openai/codex-universal:latest
 ```
 
+This repository builds the image for both linux/amd64 and linux/arm64. However we only run the linux/amd64 version.
+Your installed Docker may support linux/amd64 emulation by passing the `--platform linux/amd64` flag. 
+
 The below script shows how can you approximate the `setup` environment in Codex:
 
 ```sh
@@ -25,6 +28,8 @@ docker run --rm -it \
     -e CODEX_ENV_RUST_VERSION=1.87.0 \
     -e CODEX_ENV_GO_VERSION=1.23.8 \
     -e CODEX_ENV_SWIFT_VERSION=6.1 \
+    -e CODEX_ENV_RUBY_VERSION=3.4.4 \
+    -e CODEX_ENV_PHP_VERSION=8.4 \
     -v $(pwd):/workspace/$(basename $(pwd)) -w /workspace/$(basename $(pwd)) \
     ghcr.io/openai/codex-universal:latest
 ```
@@ -42,14 +47,19 @@ The following environment variables can be set to configure runtime installation
 | `CODEX_ENV_RUST_VERSION`   | Rust version to install    | `1.83.0`, `1.84.1`, `1.85.1`, `1.86.0`, `1.87.0` |                                                                      |
 | `CODEX_ENV_GO_VERSION`     | Go version to install      | `1.22.12`, `1.23.8`, `1.24.3`                    |                                                                      |
 | `CODEX_ENV_SWIFT_VERSION`  | Swift version to install   | `5.10`, `6.1`                                    |                                                                      |
+| `CODEX_ENV_RUBY_VERSION`   | Ruby version to install  | `3.2.3`, `3.3.8`, `3.4.4`                |                                                                      |
+| `CODEX_ENV_PHP_VERSION`   | PHP version to install  | `8.4`, `8.3`, `8.2`                |                                                                      |
+
+
 
 ## What's included
 
 In addition to the packages specified in the table above, the following packages are also installed:
 
-- `ruby`: 3.2.3
 - `bun`: 1.2.10
 - `java`: 21
 - `bazelisk` / `bazel`
+- `erlang`: 27.1.2
+- `elixir`: 1.18.3
 
 See [Dockerfile](Dockerfile) for the full details of installed packages.

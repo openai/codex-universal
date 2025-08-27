@@ -14,6 +14,9 @@ The Docker image is available at:
 docker pull ghcr.io/openai/codex-universal:latest
 ```
 
+This repository builds the image for both linux/amd64 and linux/arm64. However we only run the linux/amd64 version.
+Your installed Docker may support linux/amd64 emulation by passing the `--platform linux/amd64` flag. 
+
 The below script shows how can you approximate the `setup` environment in Codex:
 
 ```sh

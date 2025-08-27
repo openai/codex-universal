@@ -165,13 +165,20 @@ RUN mise use --global "bun@${BUN_VERSION}"
 
 ### JAVA ###
 
-ARG JAVA_VERSIONS="21 17 11"
 ARG GRADLE_VERSION=8.14
 ARG MAVEN_VERSION=3.9.10
-RUN for v in $JAVA_VERSIONS; do mise install "java@${v}"; done \
-    && mise use --global "java@${JAVA_VERSIONS%% *}" \
-    && mise use --global "gradle@${GRADLE_VERSION}" \
-    && mise use --global "maven@${MAVEN_VERSION}"
+
+# OpenJDK 11 is not available for arm64. Codex Web only uses amd64 which
+# does support 11.
+RUN if [ "$TARGETARCH" = "arm64" ]; then \
+        JAVA_VERSIONS="21 17"; \
+    else \
+        JAVA_VERSIONS="21 17 11"; \
+    fi; \
+    for v in $JAVA_VERSIONS; do mise install "java@${v}"; done && \
+    mise use --global "java@${JAVA_VERSIONS%% *}" && \
+    mise use --global "gradle@${GRADLE_VERSION}" && \
+    mise use --global "maven@${MAVEN_VERSION}"
 
 ### SWIFT ###
 

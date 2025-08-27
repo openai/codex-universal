@@ -77,7 +77,7 @@ RUN apt-get update \
 
 RUN install -dm 755 /etc/apt/keyrings \
     && curl -fsSL https://mise.jdx.dev/gpg-key.pub | gpg --dearmor | tee /etc/apt/keyrings/mise-archive-keyring.gpg 1> /dev/null \
-    && echo "deb [signed-by=/etc/apt/keyrings/mise-archive-keyring.gpg arch=amd64] https://mise.jdx.dev/deb stable main" | tee /etc/apt/sources.list.d/mise.list \
+    && echo "deb [signed-by=/etc/apt/keyrings/mise-archive-keyring.gpg] https://mise.jdx.dev/deb stable main" | tee /etc/apt/sources.list.d/mise.list \
     && apt-get update && apt-get install -y --no-install-recommends mise/stable \
     && rm -rf /var/lib/apt/lists/* \
     && echo 'eval "$(mise activate bash)"' >> /etc/profile \
@@ -202,7 +202,11 @@ RUN pipx install cpplint==2.0.* clang-tidy==20.1.* clang-format==20.1.* cmakelan
 
 ### BAZEL ###
 
-RUN curl -L --fail https://github.com/bazelbuild/bazelisk/releases/download/v1.26.0/bazelisk-linux-amd64 -o /usr/local/bin/bazelisk \
+ARG TARGETOS
+ARG TARGETARCH
+ARG BAZELISK_VERSION=v1.26.0
+
+RUN curl -L --fail https://github.com/bazelbuild/bazelisk/releases/download/${BAZELISK_VERSION}/bazelisk-${TARGETOS}-${TARGETARCH} -o /usr/local/bin/bazelisk \
     && chmod +x /usr/local/bin/bazelisk \
     && ln -s /usr/local/bin/bazelisk /usr/local/bin/bazel
 

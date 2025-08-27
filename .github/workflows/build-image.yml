@@ -17,56 +17,97 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  build-and-push:
+  build-amd64:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-      attestations: write
-      id-token: write
+    outputs:
+      digest: ${{ steps.build.outputs.digest }}
     steps:
-    - uses: actions/checkout@v4
-    - name: Log in to ghcr.io
-      uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
-      with:
-        registry: ${{ env.REGISTRY }}
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-    - name: Set up QEMU
-      uses: docker/setup-qemu-action@v3
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
-    
-    - name: Build and push (amd64)
-      uses: docker/build-push-action@v6
-      with:
-        platforms: linux/amd64
-        push: ${{ github.event_name == 'push' }}
-        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-        cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache
-        cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache,mode=max,compression=zstd,oci-mediatypes=true
-        provenance: false
-        sbom: false
-        secrets: |
-          GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
+      - name: Free disk
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL || true
+          docker system prune -af || true
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - name: Build & push (amd64)
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          platforms: linux/amd64
+          push: ${{ github.event_name == 'push' }}
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:amd64-${{ github.sha }}
+          # Use GHA cache only (works on PRs). Swap to registry cache on pushes if you prefer.
+          cache-from: type=gha,scope=${{ github.workflow }}-${{ runner.os }}-amd64
+          cache-to:   type=gha,mode=min,scope=${{ github.workflow }}-${{ runner.os }}-amd64
+          provenance: false
+          sbom: false
+          secrets: |
+            GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
 
-    - name: Build and push (arm64)
-      uses: docker/build-push-action@v6
-      with:
-        platforms: linux/arm64
-        push: ${{ github.event_name == 'push' }}
-        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-        cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache
-        cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache,mode=max,compression=zstd,oci-mediatypes=true
-        provenance: false
-        sbom: false
-        secrets: |
-          GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
-    
-    - name: Generate artifact attestation
-      uses: actions/attest-build-provenance@v2
-      if: ${{ github.event_name == 'push' }}
-      with:
-        push-to-registry: true
-        subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-        subject-digest: ${{ steps.docker_build.outputs.digest }}
+  build-arm64:
+    runs-on: ubuntu-latest
+    outputs:
+      digest: ${{ steps.build.outputs.digest }}
+    steps:
+      - name: Free disk
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL || true
+          docker system prune -af || true
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - name: Build & push (arm64)
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          platforms: linux/arm64
+          push: ${{ github.event_name == 'push' }}
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:arm64-${{ github.sha }}
+          cache-from: type=gha,scope=${{ github.workflow }}-${{ runner.os }}-arm64
+          cache-to:   type=gha,mode=min,scope=${{ github.workflow }}-${{ runner.os }}-arm64
+          provenance: false
+          sbom: false
+          secrets: |
+            GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
+
+  manifest-and-attest:
+    if: ${{ github.event_name == 'push' }}
+    runs-on: ubuntu-latest
+    needs: [build-amd64, build-arm64]
+    steps:
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Stitch multi-arch manifest (:latest and :sha)
+        run: |
+          docker buildx imagetools create \
+            -t "$REGISTRY/$IMAGE_NAME:latest" \
+            -t "$REGISTRY/$IMAGE_NAME:${GITHUB_SHA}" \
+            "$REGISTRY/$IMAGE_NAME@${{ needs.build-amd64.outputs.digest }}" \
+            "$REGISTRY/$IMAGE_NAME@${{ needs.build-arm64.outputs.digest }}"
+
+      - name: Get manifest digest
+        id: manifest
+        run: |
+          DIGEST=$(docker buildx imagetools inspect "$REGISTRY/$IMAGE_NAME:latest" | awk '/^Digest:/{print $2; exit}')
+          echo "digest=$DIGEST" >> "$GITHUB_OUTPUT"
+
+      - name: Generate artifact attestation
+        uses: actions/attest-build-provenance@v2
+        with:
+          push-to-registry: true
+          subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          subject-digest: ${{ steps.manifest.outputs.digest }}

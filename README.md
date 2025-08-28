@@ -2,7 +2,9 @@
 
 `codex-universal` is a reference implementation of the base Docker image available in [OpenAI Codex](http://platform.openai.com/docs/codex).
 
-This repository is intended to help developers cutomize environments in Codex, by providing a similar image that can be pulled and run locally. This is not an identical environment but should help for debugging and development.
+This repository is intended to help developers customize environments in Codex, by providing a similar image that can be pulled and run locally. This is not an identical environment but should help for debugging and development.
+
+Internet access may be enabled in Codex for task execution or task setup, which routes outbound HTTP / HTTPS traffic through a MitM proxy to intercept and filter requests. TLS connections use a custom root certificate authority for this (`$CODEX_PROXY_CERT`). Tools that perform certificate validation may need to trust this CA to function correctly.
 
 For more details on environment setup, see [OpenAI Codex](http://platform.openai.com/docs/codex).
 

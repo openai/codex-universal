@@ -57,8 +57,6 @@ RUN apt-get update \
         openssh-client=1:9.6p1-* \
         pkg-config=1.8.* \
         protobuf-compiler=3.21.* \
-        python3=3.12.* \
-        python3-pip=24.* \
         ripgrep=14.1.* \
         rsync=3.2.* \
         software-properties-common=0.99.* \
@@ -79,11 +77,9 @@ RUN apt-get update \
 ### MISE ###
 
 RUN install -dm 0755 /etc/apt/keyrings \
-    && curl -fsSL https://mise.jdx.dev/gpg-key.pub \
-       | gpg --batch --yes --dearmor -o /etc/apt/keyrings/mise-archive-keyring.gpg \
+    && curl -fsSL https://mise.jdx.dev/gpg-key.pub | gpg --batch --yes --dearmor -o /etc/apt/keyrings/mise-archive-keyring.gpg \
     && chmod 0644 /etc/apt/keyrings/mise-archive-keyring.gpg \
-    && echo "deb [signed-by=/etc/apt/keyrings/mise-archive-keyring.gpg] https://mise.jdx.dev/deb stable main" \
-       > /etc/apt/sources.list.d/mise.list \
+    && echo "deb [signed-by=/etc/apt/keyrings/mise-archive-keyring.gpg] https://mise.jdx.dev/deb stable main" > /etc/apt/sources.list.d/mise.list \
     && apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends mise/stable \
     && rm -rf /var/lib/apt/lists/* \
@@ -273,7 +269,7 @@ RUN chmod +x /opt/codex/setup_universal.sh
 ### VERIFICATION SCRIPT ###
 
 COPY verify.sh /opt/verify.sh
-RUN chmod +x /opt/verify.sh && bash -lc /opt/verify.sh
+RUN chmod +x /opt/verify.sh && bash -lc "TARGETARCH=$TARGETARCH /opt/verify.sh"
 
 ### ENTRYPOINT ###
 

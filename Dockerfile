@@ -1,5 +1,8 @@
 FROM ubuntu:24.04
 
+ARG TARGETOS
+ARG TARGETARCH
+
 ENV LANG="C.UTF-8"
 ENV HOME=/root
 ENV DEBIAN_FRONTEND=noninteractive
@@ -212,8 +215,6 @@ RUN pipx install cpplint==2.0.* clang-tidy==20.1.* clang-format==20.1.* cmakelan
 
 ### BAZEL ###
 
-ARG TARGETOS
-ARG TARGETARCH
 ARG BAZELISK_VERSION=v1.26.0
 
 RUN curl -L --fail https://github.com/bazelbuild/bazelisk/releases/download/${BAZELISK_VERSION}/bazelisk-${TARGETOS}-${TARGETARCH} -o /usr/local/bin/bazelisk \

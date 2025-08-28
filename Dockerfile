@@ -1,5 +1,8 @@
 FROM ubuntu:24.04
 
+ARG TARGETOS
+ARG TARGETARCH
+
 ENV LANG="C.UTF-8"
 ENV HOME=/root
 ENV DEBIAN_FRONTEND=noninteractive
@@ -54,8 +57,6 @@ RUN apt-get update \
         openssh-client=1:9.6p1-* \
         pkg-config=1.8.* \
         protobuf-compiler=3.21.* \
-        python3=3.12.* \
-        python3-pip=24.* \
         ripgrep=14.1.* \
         rsync=3.2.* \
         software-properties-common=0.99.* \
@@ -76,11 +77,9 @@ RUN apt-get update \
 ### MISE ###
 
 RUN install -dm 0755 /etc/apt/keyrings \
-    && curl -fsSL https://mise.jdx.dev/gpg-key.pub \
-       | gpg --batch --yes --dearmor -o /etc/apt/keyrings/mise-archive-keyring.gpg \
+    && curl -fsSL https://mise.jdx.dev/gpg-key.pub | gpg --batch --yes --dearmor -o /etc/apt/keyrings/mise-archive-keyring.gpg \
     && chmod 0644 /etc/apt/keyrings/mise-archive-keyring.gpg \
-    && echo "deb [signed-by=/etc/apt/keyrings/mise-archive-keyring.gpg] https://mise.jdx.dev/deb stable main" \
-       > /etc/apt/sources.list.d/mise.list \
+    && echo "deb [signed-by=/etc/apt/keyrings/mise-archive-keyring.gpg] https://mise.jdx.dev/deb stable main" > /etc/apt/sources.list.d/mise.list \
     && apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends mise/stable \
     && rm -rf /var/lib/apt/lists/* \
@@ -93,16 +92,16 @@ ENV PATH=$HOME/.local/share/mise/shims:$PATH
 
 ### LLVM ###
 
-RUN install -dm 0755 /etc/apt/keyrings \
-    && curl -fsSL https://apt.llvm.org/llvm-snapshot.gpg.key \
-       | gpg --batch --yes --dearmor -o /etc/apt/keyrings/llvm.gpg \
-    && chmod 0644 /etc/apt/keyrings/llvm.gpg \
-    && . /etc/os-release \
-    && echo "deb [signed-by=/etc/apt/keyrings/llvm.gpg] https://apt.llvm.org/${VERSION_CODENAME}/ llvm-toolchain-${VERSION_CODENAME}-20 main" \
-       > /etc/apt/sources.list.d/llvm.list \
-    && apt-get update \
-    && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends clang-20 lld-20 lldb-20 llvm-20 \
-    && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        cmake=3.28.* \
+        ccache=4.9.* \
+        ninja-build=1.11.* \
+        nasm=2.16.* \
+        yasm=1.3.* \
+        gawk=1:5.2.* \
+        lsb-release=12.0-* \
+    && rm -rf /var/lib/apt/lists/* \
+    && bash -c "$(curl -fsSL https://apt.llvm.org/llvm.sh)"
 
 ### PYTHON ###
 
@@ -121,7 +120,7 @@ RUN git -c advice.detachedHead=0 clone --branch "$PYENV_VERSION" --depth 1 https
     && pyenv install $PYTHON_VERSIONS \
     && pyenv global "$PYTHON_VERSION"
 
-    # Install pipx for common global package managers (e.g. poetry)
+# Install pipx for common global package managers (e.g. poetry)
 ENV PIPX_BIN_DIR=/root/.local/bin
 ENV PATH=$PIPX_BIN_DIR:$PATH
 RUN apt-get update && apt-get install -y --no-install-recommends pipx=1.4.* \
@@ -167,24 +166,29 @@ RUN mise use --global "bun@${BUN_VERSION}"
 
 ARG GRADLE_VERSION=8.14
 ARG MAVEN_VERSION=3.9.10
-
 # OpenJDK 11 is not available for arm64. Codex Web only uses amd64 which
 # does support 11.
-RUN if [ "$TARGETARCH" = "arm64" ]; then \
-        JAVA_VERSIONS="21 17"; \
-    else \
-        JAVA_VERSIONS="21 17 11"; \
-    fi; \
-    for v in $JAVA_VERSIONS; do mise install "java@${v}"; done && \
-    mise use --global "java@${JAVA_VERSIONS%% *}" && \
-    mise use --global "gradle@${GRADLE_VERSION}" && \
-    mise use --global "maven@${MAVEN_VERSION}"
+ARG AMD_JAVA_VERSIONS="21 17 11"
+ARG ARM_JAVA_VERSIONS="21 17"
+
+RUN JAVA_VERSIONS="$( [ "$TARGETARCH" = "arm64" ] && echo "$ARM_JAVA_VERSIONS" || echo "$AMD_JAVA_VERSIONS" )" \
+    && for v in $JAVA_VERSIONS; do mise install "java@${v}"; done \
+    && mise use --global "java@${JAVA_VERSIONS%% *}" \
+    && mise use --global "gradle@${GRADLE_VERSION}" \
+    && mise use --global "maven@${MAVEN_VERSION}"
 
 ### SWIFT ###
 
 ARG SWIFT_VERSIONS="6.1 5.10.1"
-RUN for v in $SWIFT_VERSIONS; do mise install "swift@${v}"; done \
-    && mise use --global "swift@${SWIFT_VERSIONS%% *}"
+# mise currently broken for swift on ARM
+RUN if [ "$TARGETARCH" = "amd64" ]; then \
+      for v in $SWIFT_VERSIONS; do \
+        mise install "swift@${v}"; \
+      done && \
+      mise use --global "swift@${SWIFT_VERSIONS%% *}"; \
+    else \
+      echo "Skipping Swift install on $TARGETARCH"; \
+    fi
 
 ### RUST ###
 
@@ -212,8 +216,6 @@ RUN pipx install cpplint==2.0.* clang-tidy==20.1.* clang-format==20.1.* cmakelan
 
 ### BAZEL ###
 
-ARG TARGETOS
-ARG TARGETARCH
 ARG BAZELISK_VERSION=v1.26.0
 
 RUN curl -L --fail https://github.com/bazelbuild/bazelisk/releases/download/${BAZELISK_VERSION}/bazelisk-${TARGETOS}-${TARGETARCH} -o /usr/local/bin/bazelisk \
@@ -267,7 +269,7 @@ RUN chmod +x /opt/codex/setup_universal.sh
 ### VERIFICATION SCRIPT ###
 
 COPY verify.sh /opt/verify.sh
-RUN chmod +x /opt/verify.sh && bash -lc /opt/verify.sh
+RUN chmod +x /opt/verify.sh && bash -lc "TARGETARCH=$TARGETARCH /opt/verify.sh"
 
 ### ENTRYPOINT ###
 

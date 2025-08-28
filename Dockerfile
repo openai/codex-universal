@@ -106,30 +106,34 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 ### PYTHON ###
 
 ARG PYENV_VERSION=v2.5.5
-ARG PYTHON_VERSION=3.11.12
+ARG PYTHON_VERSIONS="3.11.12 3.10 3.12 3.13"
 
 # Install pyenv
 ENV PYENV_ROOT=/root/.pyenv
 ENV PATH=$PYENV_ROOT/bin:$PATH
-ENV PYTHON_VERSIONS="3.10 3.11.12 3.12 3.13"
 RUN git -c advice.detachedHead=0 clone --branch "$PYENV_VERSION" --depth 1 https://github.com/pyenv/pyenv.git "$PYENV_ROOT" \
     && echo 'export PYENV_ROOT="$HOME/.pyenv"' >> /etc/profile \
-    && echo 'export PATH="$$PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH"' >> /etc/profile \
+    && echo 'export PATH="$PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH"' >> /etc/profile \
     && echo 'eval "$(pyenv init - bash)"' >> /etc/profile \
-    && cd "$PYENV_ROOT" && src/configure && make -C src \
+    && cd "$PYENV_ROOT" \
+    && src/configure \
+    && make -C src \
     && pyenv install $PYTHON_VERSIONS \
-    && pyenv global "$PYTHON_VERSION"
+    && pyenv global "${PYTHON_VERSIONS%% *}" \
+    && rm -rf "$PYENV_ROOT/cache"
 
 # Install pipx for common global package managers (e.g. poetry)
 ENV PIPX_BIN_DIR=/root/.local/bin
 ENV PATH=$PIPX_BIN_DIR:$PATH
-RUN apt-get update && apt-get install -y --no-install-recommends pipx=1.4.* \
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends pipx=1.4.* \
     && rm -rf /var/lib/apt/lists/* \
-    && pipx install poetry==2.1.* uv==0.7.* \
-    # Preinstall common packages for each version
+    && pipx install --pip-args="--no-cache-dir --no-compile" poetry==2.1.* uv==0.7.* \
     && for pyv in "${PYENV_ROOT}/versions/"*; do \
-        "${pyv}/bin/pip" install --upgrade pip ruff black mypy pyright isort pytest; \
-    done
+         "$pyv/bin/python" -m pip install --no-cache-dir --no-compile --upgrade pip && \
+         "$pyv/bin/pip" install --no-cache-dir --no-compile ruff black mypy pyright isort pytest; \
+       done \
+    && rm -rf /root/.cache/pip ~/.cache/pip ~/.cache/pipx
     
 # Reduce the verbosity of uv - impacts performance of stdout buffering
 ENV UV_NO_PROGRESS=1
@@ -155,12 +159,18 @@ RUN git -c advice.detachedHead=0 clone --branch "$NVM_VERSION" --depth 1 https:/
     && nvm install 18 && nvm use 18 && npm install -g npm@10.9 pnpm@10.12 && corepack enable && corepack install -g yarn \
     && nvm install 20 && nvm use 20 && npm install -g npm@11.4 pnpm@10.12 && corepack enable && corepack install -g yarn \
     && nvm install 22 && nvm use 22 && npm install -g npm@11.4 pnpm@10.12 && corepack enable && corepack install -g yarn \
-    && nvm alias default "$NODE_VERSION"
+    && nvm alias default "$NODE_VERSION" \
+    && nvm cache clear \
+    && npm cache clean --force || true \
+    && pnpm store prune || true \
+    && yarn cache clean || true
 
 ### BUN ###
 
 ARG BUN_VERSION=1.2.14
-RUN mise use --global "bun@${BUN_VERSION}"
+RUN mise use --global "bun@${BUN_VERSION}" \
+    && mise cache clear || true \
+    && rm -rf "$HOME/.cache/mise" "$HOME/.local/share/mise/downloads"
 
 ### JAVA ###
 
@@ -175,7 +185,9 @@ RUN JAVA_VERSIONS="$( [ "$TARGETARCH" = "arm64" ] && echo "$ARM_JAVA_VERSIONS" |
     && for v in $JAVA_VERSIONS; do mise install "java@${v}"; done \
     && mise use --global "java@${JAVA_VERSIONS%% *}" \
     && mise use --global "gradle@${GRADLE_VERSION}" \
-    && mise use --global "maven@${MAVEN_VERSION}"
+    && mise use --global "maven@${MAVEN_VERSION}" \
+    && mise cache clear || true \
+    && rm -rf "$HOME/.cache/mise" "$HOME/.local/share/mise/downloads"
 
 ### SWIFT ###
 
@@ -185,7 +197,9 @@ RUN if [ "$TARGETARCH" = "amd64" ]; then \
       for v in $SWIFT_VERSIONS; do \
         mise install "swift@${v}"; \
       done && \
-      mise use --global "swift@${SWIFT_VERSIONS%% *}"; \
+      mise use --global "swift@${SWIFT_VERSIONS%% *}" \
+      && mise cache clear || true \
+      && rm -rf "$HOME/.cache/mise" "$HOME/.local/share/mise/downloads"; \
     else \
       echo "Skipping Swift install on $TARGETARCH"; \
     fi
@@ -193,12 +207,11 @@ RUN if [ "$TARGETARCH" = "amd64" ]; then \
 ### RUST ###
 
 ARG RUST_VERSIONS="1.89.0 1.88.0 1.87.0 1.86.0 1.85.1 1.84.1 1.83.0"
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y \
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain none \
     && . "$HOME/.cargo/env" \
     && echo 'source $HOME/.cargo/env' >> /etc/profile \
-    && rustup install $RUST_VERSIONS \
+    && rustup toolchain install $RUST_VERSIONS --profile minimal --component rustfmt --component clippy \
     && rustup default ${RUST_VERSIONS%% *}
-
 
 ### RUBY ###
 
@@ -208,11 +221,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libgmp-dev=2:6.3.* \
     && rm -rf /var/lib/apt/lists/* \
     && for v in $RUBY_VERSIONS; do mise install "ruby@${v}"; done \
-    && mise use --global "ruby@${RUBY_VERSIONS%% *}"
+    && mise use --global "ruby@${RUBY_VERSIONS%% *}" \
+    && mise cache clear || true \
+    && rm -rf "$HOME/.cache/mise" "$HOME/.local/share/mise/downloads"
 
 ### C++ ###
 # gcc is already installed via apt-get above, so these are just additional linters, etc.
-RUN pipx install cpplint==2.0.* clang-tidy==20.1.* clang-format==20.1.* cmakelang==0.6.*
+RUN pipx install --pip-args="--no-cache-dir --no-compile" cpplint==2.0.* clang-tidy==20.1.* clang-format==20.1.* cmakelang==0.6.* \
+    && rm -rf /root/.cache/pip ~/.cache/pip ~/.cache/pipx
 
 ### BAZEL ###
 
@@ -231,7 +247,9 @@ ARG GOLANG_CI_LINT_VERSION=2.1.6
 ENV PATH=/usr/local/go/bin:$HOME/go/bin:$PATH
 RUN for v in $GO_VERSIONS; do mise install "go@${v}"; done \
     && mise use --global "go@${GO_VERSIONS%% *}" \
-    && mise use --global "golangci-lint@${GOLANG_CI_LINT_VERSION}"
+    && mise use --global "golangci-lint@${GOLANG_CI_LINT_VERSION}" \
+    && mise cache clear || true \
+    && rm -rf "$HOME/.cache/mise" "$HOME/.local/share/mise/downloads"
 
 ### PHP ###
 
@@ -252,14 +270,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         re2c=3.1-* \
     && rm -rf /var/lib/apt/lists/* \
     && for v in $PHP_VERSIONS; do mise install "php@${v}"; done \
-    && mise use --global "php@${PHP_VERSIONS%% *}"
+    && mise use --global "php@${PHP_VERSIONS%% *}" \
+    && mise cache clear || true \
+    && rm -rf "$HOME/.cache/mise" "$HOME/.local/share/mise/downloads"
 
 ### ELIXIR ###
 
 ARG ERLANG_VERSION=27.1.2
 ARG ELIXIR_VERSION=1.18.3
 RUN mise install "erlang@${ERLANG_VERSION}" "elixir@${ELIXIR_VERSION}-otp-27" \
-    && mise use --global "erlang@${ERLANG_VERSION}" "elixir@${ELIXIR_VERSION}-otp-27"
+    && mise use --global "erlang@${ERLANG_VERSION}" "elixir@${ELIXIR_VERSION}-otp-27" \
+    && mise cache clear || true \
+    && rm -rf "$HOME/.cache/mise" "$HOME/.local/share/mise/downloads"
 
 ### SETUP SCRIPTS ###
 

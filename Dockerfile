@@ -106,21 +106,20 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 ### PYTHON ###
 
 ARG PYENV_VERSION=v2.5.5
-ARG PYTHON_VERSION=3.11.12
+ARG PYTHON_VERSIONS="3.11.12 3.10 3.12 3.13"
 
 # Install pyenv
 ENV PYENV_ROOT=/root/.pyenv
 ENV PATH=$PYENV_ROOT/bin:$PATH
-ENV PYTHON_VERSIONS="3.10 3.11.12 3.12 3.13"
 RUN git -c advice.detachedHead=0 clone --branch "$PYENV_VERSION" --depth 1 https://github.com/pyenv/pyenv.git "$PYENV_ROOT" \
     && echo 'export PYENV_ROOT="$HOME/.pyenv"' >> /etc/profile \
-    && echo 'export PATH="$$PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH"' >> /etc/profile \
+    && echo 'export PATH="$PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH"' >> /etc/profile \
     && echo 'eval "$(pyenv init - bash)"' >> /etc/profile \
     && cd "$PYENV_ROOT" \
     && src/configure \
     && make -C src \
-    && pyenv install "$PYTHON_VERSIONS" \
-    && pyenv global "$PYTHON_VERSION" \
+    && pyenv install $PYTHON_VERSIONS \
+    && pyenv global "${PYTHON_VERSIONS%% *}" \
     && rm -rf "$PYENV_ROOT/cache"
 
 # Install pipx for common global package managers (e.g. poetry)
@@ -164,8 +163,7 @@ RUN git -c advice.detachedHead=0 clone --branch "$NVM_VERSION" --depth 1 https:/
     && nvm cache clear \
     && npm cache clean --force || true \
     && pnpm store prune || true \
-    && yarn cache clean || true \
-    && rm -rf /root/.cache/corepack /root/.npm /root/.pnpm-store /root/.cache/yarn
+    && yarn cache clean || true
 
 ### BUN ###
 
@@ -213,10 +211,7 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --pr
     && . "$HOME/.cargo/env" \
     && echo 'source $HOME/.cargo/env' >> /etc/profile \
     && rustup toolchain install $RUST_VERSIONS --profile minimal --component rustfmt --component clippy \
-    && rustup default ${RUST_VERSIONS%% *} \
-    && rm -rf "$RUSTUP_HOME/downloads" "$RUSTUP_HOME/tmp" \
-        "$CARGO_HOME/registry" "$CARGO_HOME/git"
-
+    && rustup default ${RUST_VERSIONS%% *}
 
 ### RUBY ###
 

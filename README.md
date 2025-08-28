@@ -17,6 +17,10 @@ docker pull ghcr.io/openai/codex-universal:latest
 This repository builds the image for both linux/amd64 and linux/arm64. However we only run the linux/amd64 version.
 Your installed Docker may support linux/amd64 emulation by passing the `--platform linux/amd64` flag. 
 
+The arm64 differs from the amd64 image in 2 ways:
+- OpenJDK 10 is not available on amd64
+- The arm64 image skips install swift because of a current bug with mise
+
 The below script shows how can you approximate the `setup` environment in Codex:
 
 ```sh

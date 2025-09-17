@@ -91,10 +91,18 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Stitch multi-arch manifest (:latest and :sha)
+      - name: Get @openai/codex version
+        id: codex-version
+        run: |
+          CODEX_VERSION=$(curl -s https://registry.npmjs.org/@openai/codex | jq -r '.["dist-tags"].latest')
+          echo "version=$CODEX_VERSION" >> "$GITHUB_OUTPUT"
+          echo "Codex version: $CODEX_VERSION"
+
+      - name: Stitch multi-arch manifest (:latest, :version and :sha)
         run: |
           docker buildx imagetools create \
             -t "$REGISTRY/$IMAGE_NAME:latest" \
+            -t "$REGISTRY/$IMAGE_NAME:${{ steps.codex-version.outputs.version }}" \
             -t "$REGISTRY/$IMAGE_NAME:${GITHUB_SHA}" \
             "$REGISTRY/$IMAGE_NAME@${{ needs.build-amd64.outputs.digest }}" \
             "$REGISTRY/$IMAGE_NAME@${{ needs.build-arm64.outputs.digest }}"

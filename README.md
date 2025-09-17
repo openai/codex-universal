@@ -40,7 +40,7 @@ codex --version
 ## What's included
 
 - **Ubuntu 24.04** base image
-- **Node.js 22** with npm
+- **Node.js** (from Ubuntu repository) with npm
 - **@openai/codex** CLI tool (latest version)
 - Essential development tools: git, curl, wget, jq, make, openssh-client, unzip, zip
 
@@ -49,3 +49,12 @@ codex --version
 - `latest` - Latest build from main branch
 - `<version>` - Tagged with the @openai/codex npm package version (e.g., `0.36.0`)
 - `<sha>` - Tagged with git commit SHA
+
+## Development Notes
+
+This image is dramatically simplified from the original `codex-universal` image, reducing from 301 lines to ~47 lines in the Dockerfile (84% reduction). It focuses solely on providing a minimal environment for the Codex CLI rather than supporting multiple programming languages and runtimes.
+
+To complete the setup in a production environment, replace the placeholder installation in the Dockerfile with:
+```dockerfile
+RUN npm install -g @openai/codex
+```

@@ -1,0 +1,254 @@
+name: Backfill Historical Codex Versions
+
+on:
+  workflow_dispatch:
+    inputs:
+      max_versions:
+        description: 'Maximum number of versions to build (default: 10, max: 50)'
+        required: false
+        default: '10'
+        type: string
+      force_rebuild:
+        description: 'Force rebuild even if image exists'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+  attestations: write
+
+env:
+  GHCR_REGISTRY: ghcr.io
+  DOCKERHUB_REGISTRY: docker.io
+  GHCR_IMAGE_NAME: ${{ github.repository }}
+  DOCKERHUB_IMAGE_NAME: ${{ github.repository_owner }}/codex-sandbox
+
+jobs:
+  discover-versions:
+    runs-on: ubuntu-latest
+    outputs:
+      versions-matrix: ${{ steps.get-versions.outputs.versions-matrix }}
+      total-versions: ${{ steps.get-versions.outputs.total-versions }}
+    steps:
+      - name: Get all @openai/codex versions
+        id: get-versions
+        run: |
+          MAX_VERSIONS="${{ github.event.inputs.max_versions || '10' }}"
+          FORCE_REBUILD="${{ github.event.inputs.force_rebuild || 'false' }}"
+          
+          # Validate max_versions input
+          if [[ ! "$MAX_VERSIONS" =~ ^[0-9]+$ ]] || [ "$MAX_VERSIONS" -gt 50 ] || [ "$MAX_VERSIONS" -lt 1 ]; then
+            echo "❌ Invalid max_versions: $MAX_VERSIONS. Must be a number between 1-50."
+            exit 1
+          fi
+          
+          echo "🔍 Getting all @openai/codex versions..."
+          ALL_VERSIONS=$(npm view @openai/codex versions --json | jq -r '.[]' | sort -V -r)
+          
+          echo "📦 Available versions:"
+          echo "$ALL_VERSIONS" | head -20
+          
+          VERSIONS_TO_BUILD=()
+          COUNT=0
+          
+          for VERSION in $ALL_VERSIONS; do
+            if [ $COUNT -ge $MAX_VERSIONS ]; then
+              break
+            fi
+            
+            if [ "$FORCE_REBUILD" = "true" ]; then
+              echo "🔄 Force rebuild enabled - adding version $VERSION"
+              VERSIONS_TO_BUILD+=("$VERSION")
+              ((COUNT++))
+            else
+              # Check if image already exists in GHCR
+              if docker manifest inspect "$GHCR_REGISTRY/$GHCR_IMAGE_NAME:$VERSION" >/dev/null 2>&1; then
+                echo "✅ Version $VERSION already exists, skipping"
+              else
+                echo "🏗️  Version $VERSION needs to be built"
+                VERSIONS_TO_BUILD+=("$VERSION")
+                ((COUNT++))
+              fi
+            fi
+          done
+          
+          if [ ${#VERSIONS_TO_BUILD[@]} -eq 0 ]; then
+            echo "✨ No versions need to be built!"
+            echo "versions-matrix=[]" >> "$GITHUB_OUTPUT"
+            echo "total-versions=0" >> "$GITHUB_OUTPUT"
+          else
+            # Convert array to JSON format for matrix strategy
+            VERSIONS_JSON=$(printf '%s\n' "${VERSIONS_TO_BUILD[@]}" | jq -R . | jq -s .)
+            echo "versions-matrix=$VERSIONS_JSON" >> "$GITHUB_OUTPUT"
+            echo "total-versions=${#VERSIONS_TO_BUILD[@]}" >> "$GITHUB_OUTPUT"
+            
+            echo "📋 Will build ${#VERSIONS_TO_BUILD[@]} versions:"
+            printf '%s\n' "${VERSIONS_TO_BUILD[@]}"
+          fi
+
+  build-amd64:
+    if: needs.discover-versions.outputs.total-versions != '0'
+    runs-on: ubuntu-24.04
+    needs: discover-versions
+    strategy:
+      fail-fast: false
+      matrix:
+        version: ${{ fromJson(needs.discover-versions.outputs.versions-matrix) }}
+    steps:
+      - name: Free disk
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL || true
+          docker system prune -af || true
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.GHCR_REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.DOCKERHUB_REGISTRY }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - name: Build & push (amd64) - version ${{ matrix.version }}
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ${{ env.GHCR_REGISTRY }}/${{ env.GHCR_IMAGE_NAME }}:amd64-${{ matrix.version }}
+            ${{ env.DOCKERHUB_REGISTRY }}/${{ env.DOCKERHUB_IMAGE_NAME }}:amd64-${{ matrix.version }}
+          # Use GHA cache with version-specific scope
+          cache-from: type=gha,scope=${{ github.workflow }}-${{ runner.os }}-amd64-${{ matrix.version }}
+          cache-to:   type=gha,mode=min,scope=${{ github.workflow }}-${{ runner.os }}-amd64-${{ matrix.version }}
+          provenance: false
+          sbom: false
+          secrets: |
+            GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
+
+  build-arm64:
+    if: needs.discover-versions.outputs.total-versions != '0'
+    runs-on: ubuntu-24.04-arm
+    needs: discover-versions
+    strategy:
+      fail-fast: false
+      matrix:
+        version: ${{ fromJson(needs.discover-versions.outputs.versions-matrix) }}
+    steps:
+      - name: Free disk
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL || true
+          docker system prune -af || true
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.GHCR_REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.DOCKERHUB_REGISTRY }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - name: Build & push (arm64) - version ${{ matrix.version }}
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          platforms: linux/arm64
+          push: true
+          tags: |
+            ${{ env.GHCR_REGISTRY }}/${{ env.GHCR_IMAGE_NAME }}:arm64-${{ matrix.version }}
+            ${{ env.DOCKERHUB_REGISTRY }}/${{ env.DOCKERHUB_IMAGE_NAME }}:arm64-${{ matrix.version }}
+          cache-from: type=gha,scope=${{ github.workflow }}-${{ runner.os }}-arm64-${{ matrix.version }}
+          cache-to:   type=gha,mode=min,scope=${{ github.workflow }}-${{ runner.os }}-arm64-${{ matrix.version }}
+          provenance: false
+          sbom: false
+          secrets: |
+            GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
+
+  create-manifests:
+    if: needs.discover-versions.outputs.total-versions != '0'
+    runs-on: ubuntu-latest
+    needs: [discover-versions, build-amd64, build-arm64]
+    strategy:
+      fail-fast: false
+      matrix:
+        version: ${{ fromJson(needs.discover-versions.outputs.versions-matrix) }}
+    steps:
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.GHCR_REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.DOCKERHUB_REGISTRY }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Create multi-arch manifest for GHCR - version ${{ matrix.version }}
+        run: |
+          VERSION="${{ matrix.version }}"
+          docker buildx imagetools create \
+            -t "$GHCR_REGISTRY/$GHCR_IMAGE_NAME:$VERSION" \
+            "$GHCR_REGISTRY/$GHCR_IMAGE_NAME:amd64-$VERSION" \
+            "$GHCR_REGISTRY/$GHCR_IMAGE_NAME:arm64-$VERSION"
+          echo "✅ Created GHCR manifest for version $VERSION"
+
+      - name: Create multi-arch manifest for Docker Hub - version ${{ matrix.version }}
+        run: |
+          VERSION="${{ matrix.version }}"
+          docker buildx imagetools create \
+            -t "$DOCKERHUB_REGISTRY/$DOCKERHUB_IMAGE_NAME:$VERSION" \
+            "$DOCKERHUB_REGISTRY/$DOCKERHUB_IMAGE_NAME:amd64-$VERSION" \
+            "$DOCKERHUB_REGISTRY/$DOCKERHUB_IMAGE_NAME:arm64-$VERSION"
+          echo "✅ Created Docker Hub manifest for version $VERSION"
+
+      - name: Generate artifact attestation for GHCR - version ${{ matrix.version }}
+        run: |
+          VERSION="${{ matrix.version }}"
+          DIGEST=$(docker buildx imagetools inspect "$GHCR_REGISTRY/$GHCR_IMAGE_NAME:$VERSION" | awk '/^Digest:/{print $2; exit}')
+          echo "📋 GHCR $VERSION digest: $DIGEST"
+        continue-on-error: true
+
+      - name: Generate artifact attestation for Docker Hub - version ${{ matrix.version }}
+        run: |
+          VERSION="${{ matrix.version }}"
+          DIGEST=$(docker buildx imagetools inspect "$DOCKERHUB_REGISTRY/$DOCKERHUB_IMAGE_NAME:$VERSION" | awk '/^Digest:/{print $2; exit}')
+          echo "📋 Docker Hub $VERSION digest: $DIGEST"
+        continue-on-error: true
+
+  summary:
+    if: always()
+    runs-on: ubuntu-latest
+    needs: [discover-versions, build-amd64, build-arm64, create-manifests]
+    steps:
+      - name: Build Summary
+        run: |
+          TOTAL_VERSIONS="${{ needs.discover-versions.outputs.total-versions }}"
+          
+          if [ "$TOTAL_VERSIONS" = "0" ]; then
+            echo "✨ **Backfill Complete!** All versions are already built."
+          else
+            echo "🎉 **Backfill Summary**"
+            echo ""
+            echo "📦 **Built $TOTAL_VERSIONS versions:**"
+            echo '${{ needs.discover-versions.outputs.versions-matrix }}' | jq -r '.[]' | sed 's/^/- /'
+            echo ""
+            echo "🔗 **Images available at:**"
+            echo "- GitHub Container Registry: \`ghcr.io/${{ env.GHCR_IMAGE_NAME }}:<version>\`"
+            echo "- Docker Hub: \`${{ env.DOCKERHUB_IMAGE_NAME }}:<version>\`"
+            echo ""
+            echo "💡 **Next steps:**"
+            echo "- Run this workflow again to build more versions if needed"
+            echo "- Use \`force_rebuild: true\` to rebuild existing versions"
+            echo "- Increase \`max_versions\` to build more versions at once"
+          fi

@@ -1,50 +1,45 @@
 FROM ubuntu:24.04
 
-ARG TARGETOS
-ARG TARGETARCH
+# Install basic development tools, ca-certificates, and iptables/ipset, then clean up apt cache to reduce image size
+RUN apt-get update && apt-get install -y --no-install-recommends \
+  aggregate \
+  ca-certificates \
+  curl \
+  dnsutils \
+  fzf \
+  gh \
+  git \
+  gnupg2 \
+  iproute2 \
+  ipset \
+  iptables \
+  jq \
+  less \
+  man-db \
+  procps \
+  unzip \
+  ripgrep \
+  zsh \
+  && rm -rf /var/lib/apt/lists/*
 
-ENV LANG="C.UTF-8"
-ENV HOME=/root
-ENV DEBIAN_FRONTEND=noninteractive
+# Install Node.js 24
+RUN curl -fsSL https://deb.nodesource.com/setup_24.x | bash - \
+  && apt-get install -y nodejs \
+  && rm -rf /var/lib/apt/lists/*
 
-### BASE ###
+# Set up npm global directory with proper permissions
+RUN mkdir -p /usr/local/share/npm-global \
+  && chmod 755 /usr/local/share/npm-global
 
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-        ca-certificates \
-        curl \
-        git \
-        gnupg \
-        jq \
-        make \
-        openssh-client \
-        unzip \
-        wget \
-        xz-utils \
-        zip \
-    && rm -rf /var/lib/apt/lists/*
+# Install codex from npm globally
+ARG CODEX_VERSION=latest
+RUN npm install -g @openai/codex@${CODEX_VERSION} \
+    && npm cache clean --force
 
-### NODE.JS ###
+# Set npm global config for any user
+ENV NPM_CONFIG_PREFIX=/usr/local/share/npm-global
+ENV PATH=$PATH:/usr/local/share/npm-global/bin
 
-# Install Node.js from Ubuntu repository
-RUN apt-get update \
-    && apt-get install -y nodejs npm \
-    && rm -rf /var/lib/apt/lists/*
-
-### CODEX CLI ###
-
-# Note: In a real environment without SSL certificate issues, this would be:
-# RUN npm install -g @openai/codex
-# 
-# For production use, you would replace this placeholder with the actual installation.
-# The SSL certificate issues encountered during this build are specific to this
-# sandboxed environment and should not occur in normal Docker builds.
-RUN echo '#!/bin/bash\necho "Codex CLI would be available here"\necho "Run: npm install -g @openai/codex"\necho "Current placeholder version: 0.36.0"' > /usr/local/bin/codex \
-    && chmod +x /usr/local/bin/codex
-
-### ENTRYPOINT ###
-
-COPY entrypoint.sh /opt/entrypoint.sh
-RUN chmod +x /opt/entrypoint.sh
-
-ENTRYPOINT  ["/opt/entrypoint.sh"]
+# Inside the container we consider the environment already sufficiently locked
+# down, therefore instruct Codex CLI to allow running without sandboxing.
+ENV CODEX_UNSAFE_ALLOW_NO_SANDBOX=1

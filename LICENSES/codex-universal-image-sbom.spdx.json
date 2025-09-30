@@ -1011,6 +1011,256 @@
       "licenseDeclared": "Artistic-2.0",
       "supplier": "Organization: Unknown",
       "description": "Installed via corepack"
+    },
+    {
+      "name": "prettier",
+      "SPDXID": "SPDXRef-Package-prettier",
+      "versionInfo": "latest",
+      "downloadLocation": "https://www.npmjs.com/package/prettier",
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "supplier": "Organization: Unknown",
+      "description": "Installed via npm"
+    },
+    {
+      "name": "eslint",
+      "SPDXID": "SPDXRef-Package-eslint",
+      "versionInfo": "latest",
+      "downloadLocation": "https://www.npmjs.com/package/eslint",
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "supplier": "Organization: Unknown",
+      "description": "Installed via npm"
+    },
+    {
+      "name": "typescript",
+      "SPDXID": "SPDXRef-Package-typescript",
+      "versionInfo": "latest",
+      "downloadLocation": "https://www.npmjs.com/package/typescript",
+      "licenseConcluded": "Apache-2.0",
+      "licenseDeclared": "Apache-2.0",
+      "supplier": "Organization: Unknown",
+      "description": "Installed via npm"
+    },
+    {
+      "name": "pdfjs-dist",
+      "SPDXID": "SPDXRef-Package-pdfjs-dist",
+      "versionInfo": "latest",
+      "downloadLocation": "https://www.npmjs.com/package/pdfjs-dist",
+      "licenseConcluded": "Apache-2.0",
+      "licenseDeclared": "Apache-2.0",
+      "supplier": "Organization: Unknown",
+      "description": "Installed via npm"
+    },
+    {
+      "name": "react-pdf",
+      "SPDXID": "SPDXRef-Package-react-pdf",
+      "versionInfo": "latest",
+      "downloadLocation": "https://www.npmjs.com/package/react-pdf",
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "supplier": "Organization: Unknown",
+      "description": "Installed via npm"
+    },
+    {
+      "name": "@react-pdf/renderer",
+      "SPDXID": "SPDXRef-Package-react-pdf-renderer",
+      "versionInfo": "latest",
+      "downloadLocation": "https://www.npmjs.com/package/@react-pdf/renderer",
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "supplier": "Organization: Unknown",
+      "description": "Installed via npm"
+    },
+    {
+      "name": "pdf-lib",
+      "SPDXID": "SPDXRef-Package-pdf-lib",
+      "versionInfo": "latest",
+      "downloadLocation": "https://www.npmjs.com/package/pdf-lib",
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "supplier": "Organization: Unknown",
+      "description": "Installed via npm"
+    },
+    {
+      "name": "pdfmake",
+      "SPDXID": "SPDXRef-Package-pdfmake",
+      "versionInfo": "latest",
+      "downloadLocation": "https://www.npmjs.com/package/pdfmake",
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "supplier": "Organization: Unknown",
+      "description": "Installed via npm"
+    },
+    {
+      "name": "@supabase/supabase-js",
+      "SPDXID": "SPDXRef-Package-supabase-js",
+      "versionInfo": "latest",
+      "downloadLocation": "https://www.npmjs.com/package/@supabase/supabase-js",
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "supplier": "Organization: Unknown",
+      "description": "Installed via npm"
+    },
+    {
+      "name": "@supabase/auth-helpers-nextjs",
+      "SPDXID": "SPDXRef-Package-supabase-auth-helpers-nextjs",
+      "versionInfo": "latest",
+      "downloadLocation": "https://www.npmjs.com/package/@supabase/auth-helpers-nextjs",
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "supplier": "Organization: Unknown",
+      "description": "Installed via npm"
+    },
+    {
+      "name": "@supabase/auth-helpers-react",
+      "SPDXID": "SPDXRef-Package-supabase-auth-helpers-react",
+      "versionInfo": "latest",
+      "downloadLocation": "https://www.npmjs.com/package/@supabase/auth-helpers-react",
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "supplier": "Organization: Unknown",
+      "description": "Installed via npm"
+    },
+    {
+      "name": "supabase",
+      "SPDXID": "SPDXRef-Package-supabase",
+      "versionInfo": "latest",
+      "downloadLocation": "https://www.npmjs.com/package/supabase",
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "supplier": "Organization: Unknown",
+      "description": "Installed via npm"
+    },
+    {
+      "name": "react-hook-form",
+      "SPDXID": "SPDXRef-Package-react-hook-form",
+      "versionInfo": "latest",
+      "downloadLocation": "https://www.npmjs.com/package/react-hook-form",
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "supplier": "Organization: Unknown",
+      "description": "Installed via npm"
+    },
+    {
+      "name": "zod",
+      "SPDXID": "SPDXRef-Package-zod",
+      "versionInfo": "latest",
+      "downloadLocation": "https://www.npmjs.com/package/zod",
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "supplier": "Organization: Unknown",
+      "description": "Installed via npm"
+    },
+    {
+      "name": "@hookform/resolvers",
+      "SPDXID": "SPDXRef-Package-hookform-resolvers",
+      "versionInfo": "latest",
+      "downloadLocation": "https://www.npmjs.com/package/@hookform/resolvers",
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "supplier": "Organization: Unknown",
+      "description": "Installed via npm"
+    },
+    {
+      "name": "@typescript-eslint/eslint-plugin",
+      "SPDXID": "SPDXRef-Package-typescript-eslint-eslint-plugin",
+      "versionInfo": "latest",
+      "downloadLocation": "https://www.npmjs.com/package/@typescript-eslint/eslint-plugin",
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "supplier": "Organization: Unknown",
+      "description": "Installed via npm"
+    },
+    {
+      "name": "jest",
+      "SPDXID": "SPDXRef-Package-jest",
+      "versionInfo": "latest",
+      "downloadLocation": "https://www.npmjs.com/package/jest",
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "supplier": "Organization: Unknown",
+      "description": "Installed via npm"
+    },
+    {
+      "name": "@testing-library/react",
+      "SPDXID": "SPDXRef-Package-testing-library-react",
+      "versionInfo": "latest",
+      "downloadLocation": "https://www.npmjs.com/package/@testing-library/react",
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "supplier": "Organization: Unknown",
+      "description": "Installed via npm"
+    },
+    {
+      "name": "@testing-library/jest-dom",
+      "SPDXID": "SPDXRef-Package-testing-library-jest-dom",
+      "versionInfo": "latest",
+      "downloadLocation": "https://www.npmjs.com/package/@testing-library/jest-dom",
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "supplier": "Organization: Unknown",
+      "description": "Installed via npm"
+    },
+    {
+      "name": "vitest",
+      "SPDXID": "SPDXRef-Package-vitest",
+      "versionInfo": "latest",
+      "downloadLocation": "https://www.npmjs.com/package/vitest",
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "supplier": "Organization: Unknown",
+      "description": "Installed via npm"
+    },
+    {
+      "name": "dotenv",
+      "SPDXID": "SPDXRef-Package-dotenv",
+      "versionInfo": "latest",
+      "downloadLocation": "https://www.npmjs.com/package/dotenv",
+      "licenseConcluded": "BSD-2-Clause",
+      "licenseDeclared": "BSD-2-Clause",
+      "supplier": "Organization: Unknown",
+      "description": "Installed via npm"
+    },
+    {
+      "name": "tsx",
+      "SPDXID": "SPDXRef-Package-tsx",
+      "versionInfo": "latest",
+      "downloadLocation": "https://www.npmjs.com/package/tsx",
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "supplier": "Organization: Unknown",
+      "description": "Installed via npm"
+    },
+    {
+      "name": "axios",
+      "SPDXID": "SPDXRef-Package-axios",
+      "versionInfo": "latest",
+      "downloadLocation": "https://www.npmjs.com/package/axios",
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "supplier": "Organization: Unknown",
+      "description": "Installed via npm"
+    },
+    {
+      "name": "date-fns",
+      "SPDXID": "SPDXRef-Package-date-fns",
+      "versionInfo": "latest",
+      "downloadLocation": "https://www.npmjs.com/package/date-fns",
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "supplier": "Organization: Unknown",
+      "description": "Installed via npm"
+    },
+    {
+      "name": "clsx",
+      "SPDXID": "SPDXRef-Package-clsx",
+      "versionInfo": "latest",
+      "downloadLocation": "https://www.npmjs.com/package/clsx",
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "supplier": "Organization: Unknown",
+      "description": "Installed via npm"
     }
   ]
 }

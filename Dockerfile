@@ -199,9 +199,7 @@ RUN mise use --global "bun@${BUN_VERSION}" \
 
 ### SUPABASE CLI ###
 
-RUN . $NVM_DIR/nvm.sh \
-    && npm install -g supabase \
-    && npm cache clean --force || true
+# Removed redundant Supabase CLI installation; already included in default-packages.
 
 ### JAVA ###
 

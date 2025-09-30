@@ -153,7 +153,7 @@ ENV COREPACK_ENABLE_STRICT=0
 
 RUN git -c advice.detachedHead=0 clone --branch "$NVM_VERSION" --depth 1 https://github.com/nvm-sh/nvm.git "$NVM_DIR" \
     && echo 'source $NVM_DIR/nvm.sh' >> /etc/profile \
-    && echo "prettier\neslint\ntypescript" > $NVM_DIR/default-packages \
+    && echo "prettier\neslint\ntypescript\npdfjs-dist\nreact-pdf\n@react-pdf/renderer\npdf-lib\npdfmake\n@supabase/supabase-js\n@supabase/auth-helpers-nextjs\n@supabase/auth-helpers-react\nreact-hook-form\nzod\n@hookform/resolvers\n@typescript-eslint/eslint-plugin\njest\n@testing-library/react\n@testing-library/jest-dom\nvitest\ndotenv\ntsx\naxios\ndate-fns\nclsx" > $NVM_DIR/default-packages \
     && . $NVM_DIR/nvm.sh \
     # The latest versions of npm aren't supported on node 18, so we install each set differently
     && nvm install 18 && nvm use 18 && npm install -g npm@10.9 pnpm@10.12 && corepack enable && corepack install -g yarn \
@@ -171,6 +171,12 @@ ARG BUN_VERSION=1.2.14
 RUN mise use --global "bun@${BUN_VERSION}" \
     && mise cache clear || true \
     && rm -rf "$HOME/.cache/mise" "$HOME/.local/share/mise/downloads"
+
+### SUPABASE CLI ###
+
+RUN . $NVM_DIR/nvm.sh \
+    && npm install -g supabase \
+    && npm cache clean --force || true
 
 ### JAVA ###
 

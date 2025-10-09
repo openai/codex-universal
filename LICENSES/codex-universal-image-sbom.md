@@ -84,7 +84,7 @@ Generated for the OpenAI dev Docker image
 | go | 1.23.8 | https://golang.org/dl/ | curl+tar | BSD-3-Clause |
 | gradle | 8.14 | https://services.gradle.org | curl+unzip | Apache-2.0 |
 | bazelisk | 1.26.0 | https://github.com/bazelbuild/bazelisk | curl | Apache-2.0 |
-| swift | 6.1 | https://swift.org | swiftly script | Apache-2.0 |
+| swift | 6.2 | https://swift.org | swiftly script | Apache-2.0 |
 | llvm | latest | https://apt.llvm.org/llvm.sh | custom script | Apache-2.0 with LLVM exceptions |
 | pyenv | v2.5.5 | https://github.com/pyenv/pyenv | git clone | MIT |
 | nvm | v0.40.2 | https://github.com/nvm-sh/nvm | git clone | MIT |

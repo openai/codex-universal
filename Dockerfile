@@ -40,7 +40,7 @@ RUN apt-get update \
         liblzma-dev=5.6.* \
         libncurses-dev=6.4+20240113-* \
         libnss3-dev=2:3.98-* \
-        libpq-dev=16.9-* \
+        libpq-dev=16.10-* \
         libpsl-dev=0.21.* \
         libpython3-dev=3.12.* \
         libreadline-dev=8.2-* \
@@ -191,7 +191,7 @@ RUN JAVA_VERSIONS="$( [ "$TARGETARCH" = "arm64" ] && echo "$ARM_JAVA_VERSIONS" |
 
 ### SWIFT ###
 
-ARG SWIFT_VERSIONS="6.1 5.10.1"
+ARG SWIFT_VERSIONS="6.2 6.1 5.10.1"
 # mise currently broken for swift on ARM
 RUN if [ "$TARGETARCH" = "amd64" ]; then \
       for v in $SWIFT_VERSIONS; do \
@@ -264,7 +264,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libjpeg-dev=8c-* \
         libonig-dev=6.9.* \
         libpng-dev=1.6.* \
-        libpq-dev=16.9-* \
+        libpq-dev=16.10-* \
         libzip-dev=1.7.* \
         openssl=3.0.* \
         re2c=3.1-* \

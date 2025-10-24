@@ -58,7 +58,7 @@ if [ -n "${CODEX_ENV_GO_VERSION}" ]; then
 fi
 
 if [ -n "${CODEX_ENV_SWIFT_VERSION}" ]; then
-    current=$(swift --version | sed -n 's/^Swift version \([0-9]\+\.[0-9]\+\).*/\1/p')   # ==> 6.1
+    current=$(swift --version | sed -n 's/^Swift version \([0-9]\+\.[0-9]\+\).*/\1/p')   # ==> 6.2
     echo "# Swift: ${CODEX_ENV_SWIFT_VERSION} (default: ${current})"
     if [ "${current}" != "${CODEX_ENV_SWIFT_VERSION}" ]; then
         mise use --global "swift@${CODEX_ENV_SWIFT_VERSION}"

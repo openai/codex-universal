@@ -825,7 +825,7 @@
     {
       "name": "swift",
       "SPDXID": "SPDXRef-Package-swift",
-      "versionInfo": "6.1",
+      "versionInfo": "6.2",
       "downloadLocation": "https://swift.org",
       "licenseConcluded": "Apache-2.0",
       "licenseDeclared": "Apache-2.0",

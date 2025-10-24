@@ -105,8 +105,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 ### PYTHON ###
 
-ARG PYENV_VERSION=v2.5.5
-ARG PYTHON_VERSIONS="3.11.12 3.10 3.12 3.13"
+ARG PYENV_VERSION=v2.6.10
+ARG PYTHON_VERSIONS="3.11.12 3.10 3.12 3.13 3.14.0"
 
 # Install pyenv
 ENV PYENV_ROOT=/root/.pyenv

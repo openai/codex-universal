@@ -302,6 +302,9 @@ RUN mise install "erlang@${ERLANG_VERSION}" "elixir@${ELIXIR_VERSION}-otp-27" \
 COPY setup_universal.sh /opt/codex/setup_universal.sh
 RUN chmod +x /opt/codex/setup_universal.sh
 
+COPY configure.sh /opt/codex/configure.sh
+RUN chmod +x /opt/codex/configure.sh
+
 ### VERIFICATION SCRIPT ###
 
 COPY verify.sh /opt/verify.sh

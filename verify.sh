@@ -42,6 +42,10 @@ cargo --version
 echo "- Go:"
 go version
 
+echo "- .NET:"
+dotnet --version
+dotnet --list-sdks
+
 echo "- PHP:"
 php --version
 composer --version

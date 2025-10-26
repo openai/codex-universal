@@ -53,6 +53,7 @@ The following environment variables can be set to configure runtime installation
 | `CODEX_ENV_SWIFT_VERSION`  | Swift version to install   | `5.10`, `6.1`, `6.2`                              |                                                                      |
 | `CODEX_ENV_RUBY_VERSION`   | Ruby version to install  | `3.2.3`, `3.3.8`, `3.4.4`                |                                                                      |
 | `CODEX_ENV_PHP_VERSION`   | PHP version to install  | `8.4`, `8.3`, `8.2`                |                                                                      |
+| `CODEX_ENV_DOTNET_VERSION` | .NET SDK channel/version to install | `6.0`, `8.0`, `9.0`                         | Installs requested SDK into `~/.dotnet/<version>`                     |
 
 
 
@@ -62,6 +63,7 @@ In addition to the packages specified in the table above, the following packages
 
 - `bun`: 1.2.10
 - `java`: 21
+- `.NET SDKs`: 9.0, 8.0, 6.0
 - `bazelisk` / `bazel`
 - `erlang`: 27.1.2
 - `elixir`: 1.18.3

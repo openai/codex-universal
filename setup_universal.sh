@@ -9,6 +9,9 @@ CODEX_ENV_RUST_VERSION=${CODEX_ENV_RUST_VERSION:-}
 CODEX_ENV_GO_VERSION=${CODEX_ENV_GO_VERSION:-}
 CODEX_ENV_SWIFT_VERSION=${CODEX_ENV_SWIFT_VERSION:-}
 CODEX_ENV_PHP_VERSION=${CODEX_ENV_PHP_VERSION:-}
+CODEX_ENV_DOTNET_VERSION=${CODEX_ENV_DOTNET_VERSION:-}
+
+DEFAULT_DOTNET_ROOT=${DOTNET_ROOT:-/usr/share/dotnet}
 
 echo "Configuring language runtimes..."
 
@@ -72,4 +75,46 @@ if [ -n "${CODEX_ENV_PHP_VERSION}" ]; then
     if [ "${current}" != "${CODEX_ENV_PHP_VERSION}" ]; then
         mise use --global "php@${CODEX_ENV_PHP_VERSION}"
     fi
+fi
+
+if [ -n "${CODEX_ENV_DOTNET_VERSION}" ]; then
+    desired="${CODEX_ENV_DOTNET_VERSION}"
+    current_sdk=$(dotnet --list-sdks | awk 'NR==1 {print $1}')
+    echo "# .NET SDK: ${desired} (default: ${current_sdk:-none})"
+
+    custom_root="${HOME}/.dotnet/${desired}"
+    mkdir -p "${custom_root}"
+
+    install_args=()
+    match_pattern="^${desired}"
+    if [[ "${desired}" =~ ^[0-9]+\.[0-9]+$ ]]; then
+        install_args=(--channel "${desired}")
+        match_pattern="^${desired}\."
+    else
+        install_args=(--version "${desired}")
+    fi
+
+    needs_install=1
+    if [ -x "${custom_root}/dotnet" ]; then
+        if "${custom_root}/dotnet" --list-sdks | awk '{print $1}' | grep -Eq "${match_pattern}"; then
+            needs_install=0
+        fi
+    fi
+
+    if [ "${needs_install}" -eq 1 ]; then
+        tmp_script=$(mktemp)
+        curl -sSL https://dot.net/v1/dotnet-install.sh -o "${tmp_script}"
+        chmod +x "${tmp_script}"
+        "${tmp_script}" "${install_args[@]}" --install-dir "${custom_root}" --no-path
+        rm -f "${tmp_script}"
+    fi
+
+    export DOTNET_ROOT="${custom_root}"
+    export DOTNET_MULTILEVEL_LOOKUP=0
+    case ":${PATH}:" in
+        *:"${DOTNET_ROOT}":*) ;;
+        *) export PATH="${DOTNET_ROOT}:${PATH}" ;;
+    esac
+else
+    export DOTNET_ROOT="${DEFAULT_DOTNET_ROOT}"
 fi

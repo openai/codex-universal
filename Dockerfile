@@ -251,6 +251,20 @@ RUN for v in $GO_VERSIONS; do mise install "go@${v}"; done \
     && mise cache clear || true \
     && rm -rf "$HOME/.cache/mise" "$HOME/.local/share/mise/downloads"
 
+### DOTNET ###
+
+ARG DOTNET_CHANNELS="9.0 8.0 6.0"
+ENV DOTNET_ROOT=/usr/share/dotnet
+ENV PATH=$DOTNET_ROOT:$PATH
+RUN DOTNET_INSTALL_SCRIPT=$(mktemp) \
+    && curl -sSL https://dot.net/v1/dotnet-install.sh -o "$DOTNET_INSTALL_SCRIPT" \
+    && chmod +x "$DOTNET_INSTALL_SCRIPT" \
+    && for channel in $DOTNET_CHANNELS; do \
+         "$DOTNET_INSTALL_SCRIPT" --channel "$channel" --install-dir "$DOTNET_ROOT" --no-path; \
+       done \
+    && ln -sf "$DOTNET_ROOT/dotnet" /usr/local/bin/dotnet \
+    && rm -f "$DOTNET_INSTALL_SCRIPT"
+
 ### PHP ###
 
 ARG PHP_VERSIONS="8.4 8.3 8.2"
@@ -287,6 +301,9 @@ RUN mise install "erlang@${ERLANG_VERSION}" "elixir@${ELIXIR_VERSION}-otp-27" \
 
 COPY setup_universal.sh /opt/codex/setup_universal.sh
 RUN chmod +x /opt/codex/setup_universal.sh
+
+COPY configure.sh /opt/codex/configure.sh
+RUN chmod +x /opt/codex/configure.sh
 
 ### VERIFICATION SCRIPT ###
 

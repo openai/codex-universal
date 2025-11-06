@@ -10,7 +10,7 @@ pyenv versions | sed 's/^/  /'
 
 echo "- Node.js:"
 for version in "18" "20" "22"; do
-    nvm use --global "${version}"
+    nvm use "${version}"
     node --version
     npm --version
     pnpm --version

@@ -16,10 +16,7 @@ if [ -s "$NVM_DIR/nvm.sh" ]; then
 fi
 export NVM_NO_COLORS=1
 original_nvm_default=""
-nvm_alias_default_output=""
-if ! nvm_alias_default_output="$(nvm alias --no-colors default 2>/dev/null)"; then
-    nvm_alias_default_output=""
-fi
+nvm_alias_default_output="$(nvm alias --no-colors default 2>/dev/null || true)"
 if [ -n "${nvm_alias_default_output}" ]; then
     parsed_nvm_default="$(printf '%s\n' "${nvm_alias_default_output}" | head -n 1 | awk '{print $3}')"
     if [ -n "${parsed_nvm_default}" ] && [ "${parsed_nvm_default}" != "none" ] && [ "${parsed_nvm_default}" != "N/A" ]; then

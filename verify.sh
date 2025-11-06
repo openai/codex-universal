@@ -15,7 +15,10 @@ if [ -s "$NVM_DIR/nvm.sh" ]; then
     . "$NVM_DIR/nvm.sh"
 fi
 export NVM_NO_COLORS=1
-original_nvm_default="$(nvm alias --no-colors default 2>/dev/null | head -n 1 | awk '{print $3}')"
+original_nvm_default=""
+if nvm_alias_default_output="$(nvm alias --no-colors default 2>/dev/null)"; then
+    original_nvm_default="$(printf '%s\n' "${nvm_alias_default_output}" | head -n 1 | awk '{print $3}')"
+fi
 for version in "18" "20" "22"; do
     nvm use "${version}"
     node --version

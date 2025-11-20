@@ -67,3 +67,35 @@ In addition to the packages specified in the table above, the following packages
 - `elixir`: 1.18.3
 
 See [Dockerfile](Dockerfile) for the full details of installed packages.
+
+## Web application prototype
+
+A React + Vite web application lives in `webapp/` to demonstrate HR operations flows (auth, clock-in/out, shifts, leave, payroll, analytics, and recruitment).
+
+### Running locally
+
+```bash
+cd webapp
+npm install
+npm run dev
+```
+
+Then open the dev server URL (defaults to `http://localhost:5173`).
+
+### Seeded accounts
+
+Two accounts are pre-seeded for quick testing:
+
+- **admin@example.com** — admin role with access to scheduling, approvals, and payroll edits.
+- **employee@example.com** — employee role for self-service flows.
+
+Select either account on the login page to enter the app.
+
+### Features
+
+- Mobile-first clock-in/out screen with GPS and selfie validation hooks.
+- Shift scheduling with calendar cards and admin-only creation.
+- Leave requests and approvals with status tracking.
+- Payroll preview including overtime, prorated salaries, THR, and tax/BPJS deductions.
+- Analytics dashboard for attendance, leave, overtime, and compliance callouts.
+- Company profile/teams management and recruitment pipeline views.

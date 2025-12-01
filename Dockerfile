@@ -18,6 +18,7 @@ RUN apt-get update \
         curl=8.5.* \
         default-libmysqlclient-dev=1.1.* \
         dnsutils=1:9.18.* \
+        fd-find=9.0.* \
         gettext=0.21-* \
         git=1:2.43.* \
         git-lfs=3.4.* \
@@ -64,6 +65,7 @@ RUN apt-get update \
         swig3.0=3.0.* \
         tk-dev=8.6.* \
         tzdata=2025b-* \
+        universal-ctags=5.9.* \
         unixodbc-dev=2.3.* \
         unzip=6.0-* \
         uuid-dev=2.39.* \
@@ -134,7 +136,7 @@ RUN apt-get update \
          "$pyv/bin/pip" install --no-cache-dir --no-compile ruff black mypy pyright isort pytest; \
        done \
     && rm -rf /root/.cache/pip ~/.cache/pip ~/.cache/pipx
-    
+
 # Reduce the verbosity of uv - impacts performance of stdout buffering
 ENV UV_NO_PROGRESS=1
 

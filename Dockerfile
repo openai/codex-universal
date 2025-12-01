@@ -257,7 +257,7 @@ RUN for v in $GO_VERSIONS; do mise install "go@${v}"; done \
 
 ### PHP ###
 
-ARG PHP_VERSIONS="8.4 8.3 8.2"
+ARG PHP_VERSIONS="8.5 8.4 8.3 8.2"
 ARG COMPOSER_ALLOW_SUPERUSER=1
 RUN apt-get update && apt-get install -y --no-install-recommends \
         autoconf=2.71-* \

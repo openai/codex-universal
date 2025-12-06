@@ -162,7 +162,6 @@ RUN git -c advice.detachedHead=0 clone --branch "$NVM_VERSION" --depth 1 https:/
     && nvm install 20 && nvm use 20 && npm install -g npm@11.4 pnpm@10.12 && corepack enable && corepack install -g yarn \
     && nvm install 22 && nvm use 22 && npm install -g npm@11.4 pnpm@10.12 && corepack enable && corepack install -g yarn \
     && nvm install 24 && nvm use 24 && npm install -g npm@11.4 pnpm@10.12 && corepack enable && corepack install -g yarn \
-    && nvm install 26 && nvm use 26 && npm install -g npm@11.4 pnpm@10.12 && corepack enable && corepack install -g yarn \
     && nvm alias default "$NODE_VERSION" \
     && nvm cache clear \
     && npm cache clean --force || true \

@@ -218,7 +218,7 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --pr
 
 ### RUBY ###
 
-ARG RUBY_VERSIONS="3.2.3 3.3.8 3.4.4"
+ARG RUBY_VERSIONS="3.2.3 3.3.8 3.4.4 3.4.5 3.4.6 3.4.7"
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libyaml-dev=0.2.* \
     libgmp-dev=2:6.3.* \

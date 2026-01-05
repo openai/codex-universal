@@ -40,7 +40,7 @@ RUN apt-get update \
         liblzma-dev=5.6.* \
         libncurses-dev=6.4+20240113-* \
         libnss3-dev=2:3.98-* \
-        libpq-dev=16.10-* \
+        libpq-dev=16.* \
         libpsl-dev=0.21.* \
         libpython3-dev=3.12.* \
         libreadline-dev=8.2-* \
@@ -134,7 +134,7 @@ RUN apt-get update \
          "$pyv/bin/pip" install --no-cache-dir --no-compile ruff black mypy pyright isort pytest; \
        done \
     && rm -rf /root/.cache/pip ~/.cache/pip ~/.cache/pipx
-    
+
 # Reduce the verbosity of uv - impacts performance of stdout buffering
 ENV UV_NO_PROGRESS=1
 

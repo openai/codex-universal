@@ -48,11 +48,12 @@ The following environment variables can be set to configure runtime installation
 | -------------------------- | -------------------------- | ------------------------------------------------ | -------------------------------------------------------------------- |
 | `CODEX_ENV_PYTHON_VERSION` | Python version to install  | `3.10`, `3.11.12`, `3.12`, `3.13`, `3.14.0`        | `pyenv`, `poetry`, `uv`, `ruff`, `black`, `mypy`, `pyright`, `isort` |
 | `CODEX_ENV_NODE_VERSION`   | Node.js version to install | `18`, `20`, `22`                                 | `corepack`, `yarn`, `pnpm`, `npm`                                    |
-| `CODEX_ENV_RUST_VERSION`   | Rust version to install    | `1.83.0`, `1.84.1`, `1.85.1`, `1.86.0`, `1.87.0` |                                                                      |
+| `CODEX_ENV_RUST_VERSION`   | Rust version to install    | `1.83.0`, `1.84.1`, `1.85.1`, `1.86.0`, `1.87.0`, `1.88.0`, `1.89.0`, `1.90`, `1.91.1`, `1.92.0` |                                                                      |
 | `CODEX_ENV_GO_VERSION`     | Go version to install      | `1.22.12`, `1.23.8`, `1.24.3`, `1.25.1`           |                                                                      |
 | `CODEX_ENV_SWIFT_VERSION`  | Swift version to install   | `5.10`, `6.1`, `6.2`                              |                                                                      |
 | `CODEX_ENV_RUBY_VERSION`   | Ruby version to install  | `3.2.3`, `3.3.8`, `3.4.4`                |                                                                      |
 | `CODEX_ENV_PHP_VERSION`   | PHP version to install  | `8.4`, `8.3`, `8.2`                |                                                                      |
+| `CODEX_ENV_JAVA_VERSION`   | JDK version to install  | `25`, `24`, `23`, `22`, `21`, `17`, `11`                |                                                                      |
 
 
 
@@ -61,7 +62,6 @@ The following environment variables can be set to configure runtime installation
 In addition to the packages specified in the table above, the following packages are also installed:
 
 - `bun`: 1.2.10
-- `java`: 21
 - `bazelisk` / `bazel`
 - `erlang`: 27.1.2
 - `elixir`: 1.18.3

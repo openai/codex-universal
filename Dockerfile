@@ -181,8 +181,8 @@ ARG GRADLE_VERSION=8.14
 ARG MAVEN_VERSION=3.9.10
 # OpenJDK 11 is not available for arm64. Codex Web only uses amd64 which
 # does support 11.
-ARG AMD_JAVA_VERSIONS="21 17 11"
-ARG ARM_JAVA_VERSIONS="21 17"
+ARG AMD_JAVA_VERSIONS="25 24 23 22 21 17 11"
+ARG ARM_JAVA_VERSIONS="25 24 23 22 21 17"
 
 RUN JAVA_VERSIONS="$( [ "$TARGETARCH" = "arm64" ] && echo "$ARM_JAVA_VERSIONS" || echo "$AMD_JAVA_VERSIONS" )" \
     && for v in $JAVA_VERSIONS; do mise install "java@${v}"; done \
@@ -267,7 +267,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libjpeg-dev=8c-* \
         libonig-dev=6.9.* \
         libpng-dev=1.6.* \
-        libpq-dev=16.10-* \
         libzip-dev=1.7.* \
         openssl=3.0.* \
         re2c=3.1-* \

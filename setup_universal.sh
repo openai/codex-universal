@@ -73,3 +73,11 @@ if [ -n "${CODEX_ENV_PHP_VERSION}" ]; then
         mise use --global "php@${CODEX_ENV_PHP_VERSION}"
     fi
 fi
+
+if [ -n "${CODEX_ENV_JAVA_VERSION}" ]; then
+    current=$(java -version 2>&1 | awk -F'[ ."]+' '/version/ {print $3}')
+    echo "# Java: ${CODEX_ENV_JAVA_VERSION} (default: ${current})"
+    if [ "${current}" != "${CODEX_ENV_JAVA_VERSION}" ]; then
+        mise use --global "java@${CODEX_ENV_JAVA_VERSION}"
+    fi
+fi

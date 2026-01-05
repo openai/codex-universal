@@ -209,7 +209,7 @@ RUN if [ "$TARGETARCH" = "amd64" ]; then \
 
 ### RUST ###
 
-ARG RUST_VERSIONS="1.89.0 1.88.0 1.87.0 1.86.0 1.85.1 1.84.1 1.83.0"
+ARG RUST_VERSIONS="1.92.0 1.91.1 1.90 1.89.0 1.88.0 1.87.0 1.86.0 1.85.1 1.84.1 1.83.0"
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain none \
     && . "$HOME/.cargo/env" \
     && echo 'source $HOME/.cargo/env' >> /etc/profile \

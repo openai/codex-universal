@@ -41,9 +41,8 @@ jobs:
           platforms: linux/amd64
           push: ${{ github.event_name == 'push' }}
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:amd64-${{ github.sha }}
-          # Use GHA cache only (works on PRs). Swap to registry cache on pushes if you prefer.
-          cache-from: type=gha,scope=${{ github.workflow }}-${{ runner.os }}-amd64
-          cache-to:   type=gha,mode=min,scope=${{ github.workflow }}-${{ runner.os }}-amd64
+          cache-from: type=registry, ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          cache-to:   type=inline
           provenance: false
           sbom: false
           secrets: |
@@ -73,8 +72,8 @@ jobs:
           platforms: linux/arm64
           push: ${{ github.event_name == 'push' }}
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:arm64-${{ github.sha }}
-          cache-from: type=gha,scope=${{ github.workflow }}-${{ runner.os }}-arm64
-          cache-to:   type=gha,mode=min,scope=${{ github.workflow }}-${{ runner.os }}-arm64
+          cache-from: type=registry, ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          cache-to:   type=inline
           provenance: false
           sbom: false
           secrets: |

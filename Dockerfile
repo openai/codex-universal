@@ -285,6 +285,21 @@ RUN mise install "erlang@${ERLANG_VERSION}" "elixir@${ELIXIR_VERSION}-otp-27" \
     && mise cache clear || true \
     && rm -rf "$HOME/.cache/mise" "$HOME/.local/share/mise/downloads"
 
+
+### DOTNET ###
+
+ARG DOTNET_VERSION=9.0
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        dotnet-sdk-${DOTNET_VERSION} \
+        aspnetcore-runtime-${DOTNET_VERSION} \
+        dotnet-runtime-${DOTNET_VERSION} \
+    && rm -rf /var/lib/apt/lists/*
+
+ENV DOTNET_ROOT=/usr/share/dotnet
+ENV PATH=$DOTNET_ROOT:$PATH
+
+
 ### SETUP SCRIPTS ###
 
 COPY setup_universal.sh /opt/codex/setup_universal.sh

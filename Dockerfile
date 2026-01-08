@@ -145,7 +145,8 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     && for pyv in "${PYENV_ROOT}/versions/"*; do \
          "$pyv/bin/python" -m pip install --no-cache-dir --no-compile --root-user-action=ignore --upgrade pip && \
          "$pyv/bin/pip" install --no-cache-dir --no-compile --root-user-action=ignore ruff black mypy pyright isort pytest; \
-       done
+       done \
+    && rm -rf /root/.cache/pip/* /root/.cache/pipx/*
 
 # Reduce the verbosity of uv - impacts performance of stdout buffering
 ENV UV_NO_PROGRESS=1
@@ -186,7 +187,8 @@ RUN --mount=type=cache,target=/root/.npm \
 ARG BUN_VERSION=1.2.14
 RUN --mount=type=cache,target=/root/.cache/mise \
     mise use --global "bun@${BUN_VERSION}" \
-    && mise cache clear || true
+    && mise cache clear || true \
+    && rm -rf "$HOME/.cache/mise"/* "$HOME/.local/share/mise/downloads"/*
 
 ### JAVA ###
 
@@ -203,7 +205,8 @@ RUN --mount=type=cache,target=/root/.cache/mise \
     && mise use --global "java@${JAVA_VERSIONS%% *}" \
     && mise use --global "gradle@${GRADLE_VERSION}" \
     && mise use --global "maven@${MAVEN_VERSION}" \
-    && mise cache clear || true
+    && mise cache clear || true \
+    && rm -rf "$HOME/.cache/mise"/* "$HOME/.local/share/mise/downloads"/*
 
 ### SWIFT ###
 
@@ -215,7 +218,8 @@ RUN --mount=type=cache,target=/root/.cache/mise \
         mise install "swift@${v}"; \
       done && \
       mise use --global "swift@${SWIFT_VERSIONS%% *}" \
-      && mise cache clear || true; \
+      && mise cache clear || true \
+      && rm -rf "$HOME/.cache/mise"/* "$HOME/.local/share/mise/downloads"/*; \
     else \
       echo "Skipping Swift install on $TARGETARCH"; \
     fi
@@ -249,7 +253,8 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
 # gcc is already installed via apt-get above, so these are just additional linters, etc.
 RUN --mount=type=cache,target=/root/.cache/pip \
     --mount=type=cache,target=/root/.cache/pipx \
-    pipx install --pip-args="--no-cache-dir --no-compile --root-user-action=ignore" cpplint==2.0.* clang-tidy==20.1.* clang-format==20.1.* cmakelang==0.6.*
+    pipx install --pip-args="--no-cache-dir --no-compile --root-user-action=ignore" cpplint==2.0.* clang-tidy==20.1.* clang-format==20.1.* cmakelang==0.6.* \
+    && rm -rf /root/.cache/pip/* /root/.cache/pipx/*
 
 ### BAZEL ###
 
@@ -270,7 +275,8 @@ RUN --mount=type=cache,target=/root/.cache/mise \
     for v in $GO_VERSIONS; do mise install "go@${v}"; done \
     && mise use --global "go@${GO_VERSIONS%% *}" \
     && mise use --global "golangci-lint@${GOLANG_CI_LINT_VERSION}" \
-    && mise cache clear || true
+    && mise cache clear || true \
+    && rm -rf "$HOME/.cache/mise"/* "$HOME/.local/share/mise/downloads"/*
 
 ### PHP ###
 
@@ -289,7 +295,8 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     && rm -rf /var/lib/apt/lists/* \
     && mise install $(for v in $PHP_VERSIONS; do printf "php@%s " "$v"; done) \
     && mise use --global "php@${PHP_VERSIONS%% *}" \
-    && mise cache clear || true
+    && mise cache clear || true \
+    && rm -rf "$HOME/.cache/mise"/* "$HOME/.local/share/mise/downloads"/*
 
 ### ELIXIR ###
 
@@ -298,7 +305,8 @@ ARG ELIXIR_VERSION=1.18.3
 RUN --mount=type=cache,target=/root/.cache/mise \
     mise install "erlang@${ERLANG_VERSION}" "elixir@${ELIXIR_VERSION}-otp-27" \
     && mise use --global "erlang@${ERLANG_VERSION}" "elixir@${ELIXIR_VERSION}-otp-27" \
-    && mise cache clear || true
+    && mise cache clear || true \
+    && rm -rf "$HOME/.cache/mise"/* "$HOME/.local/share/mise/downloads"/*
 
 ### SETUP SCRIPTS ###
 

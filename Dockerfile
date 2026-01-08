@@ -141,12 +141,12 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     apt-get update \
     && apt-get install -y --no-install-recommends pipx=1.4.* \
     && rm -rf /var/lib/apt/lists/* \
-    && pipx install --pip-args="--no-cache-dir --no-compile" poetry==2.1.* uv==0.7.* \
+    && pipx install --pip-args="--no-cache-dir --no-compile --root-user-action=ignore" poetry==2.1.* uv==0.7.* \
     && for pyv in "${PYENV_ROOT}/versions/"*; do \
-         "$pyv/bin/python" -m pip install --no-cache-dir --no-compile --upgrade pip && \
-         "$pyv/bin/pip" install --no-cache-dir --no-compile ruff black mypy pyright isort pytest; \
+         "$pyv/bin/python" -m pip install --no-cache-dir --no-compile --root-user-action=ignore --upgrade pip && \
+         "$pyv/bin/pip" install --no-cache-dir --no-compile --root-user-action=ignore ruff black mypy pyright isort pytest; \
        done \
-    && rm -rf /root/.cache/pip ~/.cache/pip ~/.cache/pipx
+    && true
 
 # Reduce the verbosity of uv - impacts performance of stdout buffering
 ENV UV_NO_PROGRESS=1
@@ -256,8 +256,8 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
 # gcc is already installed via apt-get above, so these are just additional linters, etc.
 RUN --mount=type=cache,target=/root/.cache/pip \
     --mount=type=cache,target=/root/.cache/pipx \
-    pipx install --pip-args="--no-cache-dir --no-compile" cpplint==2.0.* clang-tidy==20.1.* clang-format==20.1.* cmakelang==0.6.* \
-    && rm -rf /root/.cache/pip ~/.cache/pip ~/.cache/pipx
+    pipx install --pip-args="--no-cache-dir --no-compile --root-user-action=ignore" cpplint==2.0.* clang-tidy==20.1.* clang-format==20.1.* cmakelang==0.6.* \
+    && true
 
 ### BAZEL ###
 

@@ -185,7 +185,6 @@ RUN --mount=type=cache,target=/root/.npm \
 
 ARG BUN_VERSION=1.2.14
 RUN --mount=type=cache,target=/root/.cache/mise \
-    --mount=type=cache,target=/root/.local/share/mise/downloads \
     mise use --global "bun@${BUN_VERSION}" \
     && mise cache clear || true
 
@@ -199,7 +198,6 @@ ARG AMD_JAVA_VERSIONS="25 24 23 22 21 17 11"
 ARG ARM_JAVA_VERSIONS="25 24 23 22 21 17"
 
 RUN --mount=type=cache,target=/root/.cache/mise \
-    --mount=type=cache,target=/root/.local/share/mise/downloads \
     JAVA_VERSIONS="$( [ "$TARGETARCH" = "arm64" ] && echo "$ARM_JAVA_VERSIONS" || echo "$AMD_JAVA_VERSIONS" )" \
     && for v in $JAVA_VERSIONS; do mise install "java@${v}"; done \
     && mise use --global "java@${JAVA_VERSIONS%% *}" \
@@ -212,7 +210,6 @@ RUN --mount=type=cache,target=/root/.cache/mise \
 ARG SWIFT_VERSIONS="6.2 6.1 5.10.1"
 # mise currently broken for swift on ARM
 RUN --mount=type=cache,target=/root/.cache/mise \
-    --mount=type=cache,target=/root/.local/share/mise/downloads \
     if [ "$TARGETARCH" = "amd64" ]; then \
       for v in $SWIFT_VERSIONS; do \
         mise install "swift@${v}"; \
@@ -270,7 +267,6 @@ ARG GOLANG_CI_LINT_VERSION=2.1.6
 # Go defaults GOROOT to /usr/local/go - we just need to update PATH
 ENV PATH=/usr/local/go/bin:$HOME/go/bin:$PATH
 RUN --mount=type=cache,target=/root/.cache/mise \
-    --mount=type=cache,target=/root/.local/share/mise/downloads \
     for v in $GO_VERSIONS; do mise install "go@${v}"; done \
     && mise use --global "go@${GO_VERSIONS%% *}" \
     && mise use --global "golangci-lint@${GOLANG_CI_LINT_VERSION}" \
@@ -284,7 +280,6 @@ ENV MISE_JOBS=4 MAKEFLAGS="-j4" CC="ccache gcc" CXX="ccache g++"
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
     --mount=type=cache,target=/root/.cache/mise \
-    --mount=type=cache,target=/root/.local/share/mise/downloads \
     apt-get update && apt-get install -y --no-install-recommends \
         build-essential pkg-config ccache \
         autoconf=2.71-* bison=2:3.8.* re2c=3.1-* \
@@ -301,7 +296,6 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
 ARG ERLANG_VERSION=27.1.2
 ARG ELIXIR_VERSION=1.18.3
 RUN --mount=type=cache,target=/root/.cache/mise \
-    --mount=type=cache,target=/root/.local/share/mise/downloads \
     mise install "erlang@${ERLANG_VERSION}" "elixir@${ELIXIR_VERSION}-otp-27" \
     && mise use --global "erlang@${ERLANG_VERSION}" "elixir@${ELIXIR_VERSION}-otp-27" \
     && mise cache clear || true

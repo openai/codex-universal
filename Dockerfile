@@ -187,8 +187,7 @@ ARG BUN_VERSION=1.2.14
 RUN --mount=type=cache,target=/root/.cache/mise \
     --mount=type=cache,target=/root/.local/share/mise/downloads \
     mise use --global "bun@${BUN_VERSION}" \
-    && mise cache clear || true \
-    && rm -rf "$HOME/.cache/mise" "$HOME/.local/share/mise/downloads"
+    && mise cache clear || true
 
 ### JAVA ###
 
@@ -206,8 +205,7 @@ RUN --mount=type=cache,target=/root/.cache/mise \
     && mise use --global "java@${JAVA_VERSIONS%% *}" \
     && mise use --global "gradle@${GRADLE_VERSION}" \
     && mise use --global "maven@${MAVEN_VERSION}" \
-    && mise cache clear || true \
-    && rm -rf "$HOME/.cache/mise" "$HOME/.local/share/mise/downloads"
+    && mise cache clear || true
 
 ### SWIFT ###
 
@@ -220,8 +218,7 @@ RUN --mount=type=cache,target=/root/.cache/mise \
         mise install "swift@${v}"; \
       done && \
       mise use --global "swift@${SWIFT_VERSIONS%% *}" \
-      && mise cache clear || true \
-      && rm -rf "$HOME/.cache/mise" "$HOME/.local/share/mise/downloads"; \
+      && mise cache clear || true; \
     else \
       echo "Skipping Swift install on $TARGETARCH"; \
     fi
@@ -277,8 +274,7 @@ RUN --mount=type=cache,target=/root/.cache/mise \
     for v in $GO_VERSIONS; do mise install "go@${v}"; done \
     && mise use --global "go@${GO_VERSIONS%% *}" \
     && mise use --global "golangci-lint@${GOLANG_CI_LINT_VERSION}" \
-    && mise cache clear || true \
-    && rm -rf "$HOME/.cache/mise" "$HOME/.local/share/mise/downloads"
+    && mise cache clear || true
 
 ### PHP ###
 
@@ -298,8 +294,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     && rm -rf /var/lib/apt/lists/* \
     && mise install $(for v in $PHP_VERSIONS; do printf "php@%s " "$v"; done) \
     && mise use --global "php@${PHP_VERSIONS%% *}" \
-    && mise cache clear || true \
-    && rm -rf "$HOME/.cache/mise" "$HOME/.local/share/mise/downloads"
+    && mise cache clear || true
 
 ### ELIXIR ###
 
@@ -309,8 +304,7 @@ RUN --mount=type=cache,target=/root/.cache/mise \
     --mount=type=cache,target=/root/.local/share/mise/downloads \
     mise install "erlang@${ERLANG_VERSION}" "elixir@${ELIXIR_VERSION}-otp-27" \
     && mise use --global "erlang@${ERLANG_VERSION}" "elixir@${ELIXIR_VERSION}-otp-27" \
-    && mise cache clear || true \
-    && rm -rf "$HOME/.cache/mise" "$HOME/.local/share/mise/downloads"
+    && mise cache clear || true
 
 ### SETUP SCRIPTS ###
 

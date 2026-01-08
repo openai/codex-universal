@@ -257,21 +257,16 @@ RUN for v in $GO_VERSIONS; do mise install "go@${v}"; done \
 ### PHP ###
 
 ARG PHP_VERSIONS="8.5 8.4 8.3 8.2"
-ARG COMPOSER_ALLOW_SUPERUSER=1
+ENV MISE_JOBS=4 MAKEFLAGS="-j4" CC="ccache gcc" CXX="ccache g++"
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        autoconf=2.71-* \
-        bison=2:3.8.* \
-        libgd-dev=2.3.* \
-        libedit-dev=3.1-* \
-        libicu-dev=74.2-* \
-        libjpeg-dev=8c-* \
-        libonig-dev=6.9.* \
-        libpng-dev=1.6.* \
-        libzip-dev=1.7.* \
-        openssl=3.0.* \
-        re2c=3.1-* \
+        build-essential pkg-config ccache \
+        autoconf=2.71-* bison=2:3.8.* re2c=3.1-* \
+        libgd-dev=2.3.* libedit-dev=3.1-* libicu-dev=74.2-* libjpeg-dev=8c-* \
+        libonig-dev=6.9.* libpng-dev=1.6.* libzip-dev=1.7.* \
+        libssl-dev zlib1g-dev libcurl4-openssl-dev libreadline-dev \
     && rm -rf /var/lib/apt/lists/* \
-    && for v in $PHP_VERSIONS; do mise install "php@${v}"; done \
+    && mise install $(for v in $PHP_VERSIONS; do printf "php@%s " "$v"; done) \
     && mise use --global "php@${PHP_VERSIONS%% *}" \
     && mise cache clear || true \
     && rm -rf "$HOME/.cache/mise" "$HOME/.local/share/mise/downloads"

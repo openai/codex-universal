@@ -257,7 +257,7 @@ RUN for v in $GO_VERSIONS; do mise install "go@${v}"; done \
 ### PHP ###
 
 ARG PHP_VERSIONS="8.5 8.4 8.3 8.2"
-ENV MISE_JOBS=4 MAKEFLAGS="-j$(nproc)" CC="ccache gcc" CXX="ccache g++"
+ENV MISE_JOBS=4 MAKEFLAGS="-j4" CC="ccache gcc" CXX="ccache g++"
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
         build-essential pkg-config ccache \

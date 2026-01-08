@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1.7
 FROM ubuntu:24.04
 
 ARG TARGETOS
@@ -9,7 +10,9 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 ### BASE ###
 
-RUN apt-get update \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt-get update \
     && apt-get install -y --no-install-recommends \
         binutils=2.42-* \
         sudo=1.9.* \
@@ -78,7 +81,9 @@ RUN apt-get update \
 
 ### MISE ###
 
-RUN install -dm 0755 /etc/apt/keyrings \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    install -dm 0755 /etc/apt/keyrings \
     && curl -fsSL https://mise.jdx.dev/gpg-key.pub | gpg --batch --yes --dearmor -o /etc/apt/keyrings/mise-archive-keyring.gpg \
     && chmod 0644 /etc/apt/keyrings/mise-archive-keyring.gpg \
     && echo "deb [signed-by=/etc/apt/keyrings/mise-archive-keyring.gpg] https://mise.jdx.dev/deb stable main" > /etc/apt/sources.list.d/mise.list \
@@ -94,7 +99,9 @@ ENV PATH=$HOME/.local/share/mise/shims:$PATH
 
 ### LLVM ###
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt-get update && apt-get install -y --no-install-recommends \
         cmake=3.28.* \
         ccache=4.9.* \
         ninja-build=1.11.* \
@@ -113,7 +120,9 @@ ARG PYTHON_VERSIONS="3.11.12 3.10 3.12 3.13 3.14.0"
 # Install pyenv
 ENV PYENV_ROOT=/root/.pyenv
 ENV PATH=$PYENV_ROOT/bin:$PATH
-RUN git -c advice.detachedHead=0 clone --branch "$PYENV_VERSION" --depth 1 https://github.com/pyenv/pyenv.git "$PYENV_ROOT" \
+RUN --mount=type=cache,target=/root/.cache \
+    --mount=type=cache,target=/root/.pyenv/cache \
+    git -c advice.detachedHead=0 clone --branch "$PYENV_VERSION" --depth 1 https://github.com/pyenv/pyenv.git "$PYENV_ROOT" \
     && echo 'export PYENV_ROOT="$HOME/.pyenv"' >> /etc/profile \
     && echo 'export PATH="$PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH"' >> /etc/profile \
     && echo 'eval "$(pyenv init - bash)"' >> /etc/profile \
@@ -127,7 +136,11 @@ RUN git -c advice.detachedHead=0 clone --branch "$PYENV_VERSION" --depth 1 https
 # Install pipx for common global package managers (e.g. poetry)
 ENV PIPX_BIN_DIR=/root/.local/bin
 ENV PATH=$PIPX_BIN_DIR:$PATH
-RUN apt-get update \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    --mount=type=cache,target=/root/.cache/pip \
+    --mount=type=cache,target=/root/.cache/pipx \
+    apt-get update \
     && apt-get install -y --no-install-recommends pipx=1.4.* \
     && rm -rf /var/lib/apt/lists/* \
     && pipx install --pip-args="--no-cache-dir --no-compile" poetry==2.1.* uv==0.7.* \
@@ -153,7 +166,10 @@ ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
 ENV COREPACK_ENABLE_AUTO_PIN=0
 ENV COREPACK_ENABLE_STRICT=0
 
-RUN git -c advice.detachedHead=0 clone --branch "$NVM_VERSION" --depth 1 https://github.com/nvm-sh/nvm.git "$NVM_DIR" \
+RUN --mount=type=cache,target=/root/.npm \
+    --mount=type=cache,target=/root/.cache/yarn \
+    --mount=type=cache,target=/root/.local/share/pnpm/store \
+    git -c advice.detachedHead=0 clone --branch "$NVM_VERSION" --depth 1 https://github.com/nvm-sh/nvm.git "$NVM_DIR" \
     && echo 'source $NVM_DIR/nvm.sh' >> /etc/profile \
     && echo "prettier\neslint\ntypescript" > $NVM_DIR/default-packages \
     && . $NVM_DIR/nvm.sh \
@@ -171,7 +187,9 @@ RUN git -c advice.detachedHead=0 clone --branch "$NVM_VERSION" --depth 1 https:/
 ### BUN ###
 
 ARG BUN_VERSION=1.2.14
-RUN mise use --global "bun@${BUN_VERSION}" \
+RUN --mount=type=cache,target=/root/.cache/mise \
+    --mount=type=cache,target=/root/.local/share/mise/downloads \
+    mise use --global "bun@${BUN_VERSION}" \
     && mise cache clear || true \
     && rm -rf "$HOME/.cache/mise" "$HOME/.local/share/mise/downloads"
 
@@ -184,7 +202,9 @@ ARG MAVEN_VERSION=3.9.10
 ARG AMD_JAVA_VERSIONS="25 24 23 22 21 17 11"
 ARG ARM_JAVA_VERSIONS="25 24 23 22 21 17"
 
-RUN JAVA_VERSIONS="$( [ "$TARGETARCH" = "arm64" ] && echo "$ARM_JAVA_VERSIONS" || echo "$AMD_JAVA_VERSIONS" )" \
+RUN --mount=type=cache,target=/root/.cache/mise \
+    --mount=type=cache,target=/root/.local/share/mise/downloads \
+    JAVA_VERSIONS="$( [ "$TARGETARCH" = "arm64" ] && echo "$ARM_JAVA_VERSIONS" || echo "$AMD_JAVA_VERSIONS" )" \
     && for v in $JAVA_VERSIONS; do mise install "java@${v}"; done \
     && mise use --global "java@${JAVA_VERSIONS%% *}" \
     && mise use --global "gradle@${GRADLE_VERSION}" \
@@ -196,7 +216,9 @@ RUN JAVA_VERSIONS="$( [ "$TARGETARCH" = "arm64" ] && echo "$ARM_JAVA_VERSIONS" |
 
 ARG SWIFT_VERSIONS="6.2 6.1 5.10.1"
 # mise currently broken for swift on ARM
-RUN if [ "$TARGETARCH" = "amd64" ]; then \
+RUN --mount=type=cache,target=/root/.cache/mise \
+    --mount=type=cache,target=/root/.local/share/mise/downloads \
+    if [ "$TARGETARCH" = "amd64" ]; then \
       for v in $SWIFT_VERSIONS; do \
         mise install "swift@${v}"; \
       done && \
@@ -210,7 +232,9 @@ RUN if [ "$TARGETARCH" = "amd64" ]; then \
 ### RUST ###
 
 ARG RUST_VERSIONS="1.92.0 1.91.1 1.90 1.89.0 1.88.0 1.87.0 1.86.0 1.85.1 1.84.1 1.83.0"
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain none \
+RUN --mount=type=cache,target=/root/.cargo/registry \
+    --mount=type=cache,target=/root/.cargo/git \
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain none \
     && . "$HOME/.cargo/env" \
     && echo 'source $HOME/.cargo/env' >> /etc/profile \
     && rustup toolchain install $RUST_VERSIONS --profile minimal --component rustfmt --component clippy \
@@ -219,7 +243,9 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --pr
 ### RUBY ###
 
 ARG RUBY_VERSIONS="3.2.3 3.3.8 3.4.4"
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt-get update && apt-get install -y --no-install-recommends \
     libyaml-dev=0.2.* \
     libgmp-dev=2:6.3.* \
     && rm -rf /var/lib/apt/lists/* \
@@ -230,7 +256,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 ### C++ ###
 # gcc is already installed via apt-get above, so these are just additional linters, etc.
-RUN pipx install --pip-args="--no-cache-dir --no-compile" cpplint==2.0.* clang-tidy==20.1.* clang-format==20.1.* cmakelang==0.6.* \
+RUN --mount=type=cache,target=/root/.cache/pip \
+    --mount=type=cache,target=/root/.cache/pipx \
+    pipx install --pip-args="--no-cache-dir --no-compile" cpplint==2.0.* clang-tidy==20.1.* clang-format==20.1.* cmakelang==0.6.* \
     && rm -rf /root/.cache/pip ~/.cache/pip ~/.cache/pipx
 
 ### BAZEL ###
@@ -248,7 +276,9 @@ ARG GOLANG_CI_LINT_VERSION=2.1.6
 
 # Go defaults GOROOT to /usr/local/go - we just need to update PATH
 ENV PATH=/usr/local/go/bin:$HOME/go/bin:$PATH
-RUN for v in $GO_VERSIONS; do mise install "go@${v}"; done \
+RUN --mount=type=cache,target=/root/.cache/mise \
+    --mount=type=cache,target=/root/.local/share/mise/downloads \
+    for v in $GO_VERSIONS; do mise install "go@${v}"; done \
     && mise use --global "go@${GO_VERSIONS%% *}" \
     && mise use --global "golangci-lint@${GOLANG_CI_LINT_VERSION}" \
     && mise cache clear || true \
@@ -259,7 +289,11 @@ RUN for v in $GO_VERSIONS; do mise install "go@${v}"; done \
 ARG PHP_VERSIONS="8.5 8.4 8.3 8.2"
 ENV MISE_JOBS=4 MAKEFLAGS="-j4" CC="ccache gcc" CXX="ccache g++"
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    --mount=type=cache,target=/root/.cache/mise \
+    --mount=type=cache,target=/root/.local/share/mise/downloads \
+    apt-get update && apt-get install -y --no-install-recommends \
         build-essential pkg-config ccache \
         autoconf=2.71-* bison=2:3.8.* re2c=3.1-* \
         libgd-dev=2.3.* libedit-dev=3.1-* libicu-dev=74.2-* libjpeg-dev=8c-* \
@@ -275,7 +309,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 ARG ERLANG_VERSION=27.1.2
 ARG ELIXIR_VERSION=1.18.3
-RUN mise install "erlang@${ERLANG_VERSION}" "elixir@${ELIXIR_VERSION}-otp-27" \
+RUN --mount=type=cache,target=/root/.cache/mise \
+    --mount=type=cache,target=/root/.local/share/mise/downloads \
+    mise install "erlang@${ERLANG_VERSION}" "elixir@${ELIXIR_VERSION}-otp-27" \
     && mise use --global "erlang@${ERLANG_VERSION}" "elixir@${ELIXIR_VERSION}-otp-27" \
     && mise cache clear || true \
     && rm -rf "$HOME/.cache/mise" "$HOME/.local/share/mise/downloads"

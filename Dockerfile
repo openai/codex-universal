@@ -115,7 +115,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
 ### PYTHON ###
 
 ARG PYENV_VERSION=v2.6.10
-ARG PYTHON_VERSIONS="3.11.12 3.10 3.12 3.13 3.14.0"
+ARG PYTHON_VERSIONS="3.10 3.11 3.12 3.13 3.14"
 
 # Install pyenv
 ENV PYENV_ROOT=/root/.pyenv
@@ -207,7 +207,7 @@ RUN --mount=type=cache,target=/root/.cache/mise \
 
 ### SWIFT ###
 
-ARG SWIFT_VERSIONS="6.2 6.1 5.10.1"
+ARG SWIFT_VERSIONS="6.2 6.1 5.10"
 # mise currently broken for swift on ARM
 RUN --mount=type=cache,target=/root/.cache/mise \
     if [ "$TARGETARCH" = "amd64" ]; then \
@@ -222,7 +222,7 @@ RUN --mount=type=cache,target=/root/.cache/mise \
 
 ### RUST ###
 
-ARG RUST_VERSIONS="1.92.0 1.91.1 1.90 1.89.0 1.88.0 1.87.0 1.86.0 1.85.1 1.84.1 1.83.0"
+ARG RUST_VERSIONS="1.92.0 1.91.1 1.90.0 1.89.0 1.88.0 1.87.0 1.86.0 1.85.1 1.84.1 1.83.0"
 RUN --mount=type=cache,target=/root/.cargo/registry \
     --mount=type=cache,target=/root/.cargo/git \
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain none \

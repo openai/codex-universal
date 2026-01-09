@@ -18,7 +18,9 @@ env:
 
 jobs:
   build-amd64:
-    runs-on: ubuntu-24.04
+    runs-on: 
+      group: codex-universal-runners
+      labels: codex-universal-linux-x64
     outputs:
       digest: ${{ steps.build.outputs.digest }}
     steps:
@@ -49,7 +51,9 @@ jobs:
             GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
 
   build-arm64:
-    runs-on: ubuntu-24.04-arm
+    runs-on: 
+      group: codex-universal-runners
+      labels: codex-universal-linux-arm64
     outputs:
       digest: ${{ steps.build.outputs.digest }}
     steps:
@@ -81,7 +85,9 @@ jobs:
 
   manifest-and-attest:
     if: ${{ github.event_name == 'push' }}
-    runs-on: ubuntu-latest
+    runs-on: 
+      group: codex-universal-runners
+      labels: codex-universal-linux-x64
     needs: [build-amd64, build-arm64]
     steps:
       - uses: docker/login-action@v3

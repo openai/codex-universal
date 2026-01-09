@@ -93,7 +93,9 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     && echo 'eval "$(mise activate bash)"' >> /etc/profile \
     && mise settings set experimental true \
     && mise settings set override_tool_versions_filenames none \
-    && mise settings add idiomatic_version_file_enable_tools "[]"
+    && mise settings add idiomatic_version_file_enable_tools "[]" \
+    && mise settings add disable_backends asdf \
+    && mise settings add disable_backends vfox
 
 ENV PATH=$HOME/.local/share/mise/shims:$PATH
 
@@ -275,11 +277,12 @@ RUN --mount=type=cache,target=/root/.cache/mise \
 ### PHP ###
 
 ARG PHP_VERSIONS="8.5 8.4 8.3 8.2"
-ENV MISE_JOBS=4 MAKEFLAGS="-j4" CC="ccache gcc" CXX="ccache g++"
+ENV PHPENV_ROOT=/root/.phpenv
+ENV PATH=/root/.phpenv/bin:/root/.phpenv/shims:$PATH
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    --mount=type=cache,target=/root/.cache/mise \
+    --mount=type=cache,target=/root/.phpenv/cache,sharing=locked \
     apt-get update && apt-get install -y --no-install-recommends \
         build-essential pkg-config ccache \
         autoconf=2.71-* bison=2:3.8.* re2c=3.1-* \
@@ -287,9 +290,15 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         libonig-dev=6.9.* libpng-dev=1.6.* libzip-dev=1.7.* \
         libssl-dev zlib1g-dev libcurl4-openssl-dev libreadline-dev \
     && rm -rf /var/lib/apt/lists/* \
-    && mise install $(for v in $PHP_VERSIONS; do printf "php@%s " "$v"; done) \
-    && mise use --global "php@${PHP_VERSIONS%% *}" \
-    && mise cache clear || true
+    && curl -fsSL https://raw.githubusercontent.com/phpenv/phpenv-installer/master/bin/phpenv-installer | bash \
+    && bash -lc '\
+        eval "$(phpenv init -)" && \
+        for v in $PHP_VERSIONS; do \
+            phpenv install -s $v; \
+        done && \
+        phpenv rehash \
+        phpenv global ${PHP_VERSIONS%% *}
+    '
 
 ### ELIXIR ###
 

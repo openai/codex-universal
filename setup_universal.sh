@@ -70,7 +70,7 @@ if [ -n "${CODEX_ENV_PHP_VERSION}" ]; then
     current=$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')
     echo "# PHP: ${CODEX_ENV_PHP_VERSION} (default: ${current})"
     if [ "${current}" != "${CODEX_ENV_PHP_VERSION}" ]; then
-        phpenv global "${CODEX_ENV_PHP_VERSION}"
+        phpenv global "${CODEX_ENV_PHP_VERSION}snapshot"
     fi
 fi
 

@@ -282,23 +282,25 @@ ENV PATH=/root/.phpenv/bin:/root/.phpenv/shims:$PATH
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    --mount=type=cache,target=/root/.phpenv/cache,sharing=locked \
     apt-get update && apt-get install -y --no-install-recommends \
         build-essential pkg-config ccache \
         autoconf=2.71-* bison=2:3.8.* re2c=3.1-* \
         libgd-dev=2.3.* libedit-dev=3.1-* libicu-dev=74.2-* libjpeg-dev=8c-* \
         libonig-dev=6.9.* libpng-dev=1.6.* libzip-dev=1.7.* \
-        libssl-dev zlib1g-dev libcurl4-openssl-dev libreadline-dev \
+        libssl-dev zlib1g-dev libcurl4-openssl-dev libreadline-dev libtidy-dev libxslt1-dev \
     && rm -rf /var/lib/apt/lists/* \
-    && curl -fsSL https://raw.githubusercontent.com/phpenv/phpenv-installer/master/bin/phpenv-installer | bash \
+    && git clone https://github.com/phpenv/phpenv.git /root/.phpenv \
+    && git clone https://github.com/php-build/php-build.git /root/.phpenv/plugins/php-build \
+    && echo 'eval "$(phpenv init - bash)"' >> /etc/profile \
     && bash -lc '\
         eval "$(phpenv init -)" && \
         for v in $PHP_VERSIONS; do \
-            phpenv install -s $v; \
+            phpenv install -s "${v}snapshot"; \
         done && \
-        phpenv rehash \
-        phpenv global ${PHP_VERSIONS%% *}
-    '
+        phpenv rehash && \
+        phpenv global "${PHP_VERSIONS%% *}snapshot" \
+    ' \
+    && rm -rf /root/.phpenv/cache
 
 ### ELIXIR ###
 

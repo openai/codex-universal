@@ -208,17 +208,18 @@ RUN --mount=type=cache,target=/root/.cache/mise \
 ### SWIFT ###
 
 ARG SWIFT_VERSIONS="6.2 6.1 5.10"
-# mise currently broken for swift on ARM
-RUN --mount=type=cache,target=/root/.cache/mise \
-    if [ "$TARGETARCH" = "amd64" ]; then \
-      for v in $SWIFT_VERSIONS; do \
-        mise install "swift@${v}"; \
-      done && \
-      mise use --global "swift@${SWIFT_VERSIONS%% *}" \
-      && mise cache clear || true; \
-    else \
-      echo "Skipping Swift install on $TARGETARCH"; \
-    fi
+ENV SWIFTLY_BIN_DIR=/root/.swiftly/bin
+ENV PATH=$SWIFTLY_BIN_DIR:$PATH
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gnupg2=2.4.* \
+    && curl -O https://download.swift.org/swiftly/linux/swiftly-$(uname -m).tar.gz \
+    && tar zxf swiftly-$(uname -m).tar.gz \
+    && ./swiftly init --quiet-shell-followup \
+    && for v in $SWIFT_VERSIONS; do \
+         swiftly install "$v"; \
+       done \
+    && swiftly use "${SWIFT_VERSIONS%% *}"
 
 ### RUST ###
 
@@ -236,14 +237,14 @@ RUN --mount=type=cache,target=/root/.cargo/registry \
 ARG RUBY_VERSIONS="3.2.3 3.3.8 3.4.4"
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    --mount=type=cache,target=/root/.cache/mise \
     apt-get update && apt-get install -y --no-install-recommends \
     libyaml-dev=0.2.* \
     libgmp-dev=2:6.3.* \
     && rm -rf /var/lib/apt/lists/* \
     && for v in $RUBY_VERSIONS; do mise install "ruby@${v}"; done \
     && mise use --global "ruby@${RUBY_VERSIONS%% *}" \
-    && mise cache clear || true \
-    && rm -rf "$HOME/.cache/mise" "$HOME/.local/share/mise/downloads"
+    && mise cache clear || true;
 
 ### C++ ###
 # gcc is already installed via apt-get above, so these are just additional linters, etc.
@@ -308,7 +309,7 @@ RUN chmod +x /opt/codex/setup_universal.sh
 ### VERIFICATION SCRIPT ###
 
 COPY verify.sh /opt/verify.sh
-RUN chmod +x /opt/verify.sh && bash -lc "TARGETARCH=$TARGETARCH /opt/verify.sh"
+RUN chmod +x /opt/verify.sh && bash -lc "/opt/verify.sh"
 
 ### ENTRYPOINT ###
 

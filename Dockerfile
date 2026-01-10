@@ -302,6 +302,10 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     ' \
     && rm -rf /root/.phpenv/cache
 
+# Composer
+RUN curl -sS https://getcomposer.org/installer | php \
+    && mv composer.phar /usr/local/bin/composer
+
 ### ELIXIR ###
 
 ARG ERLANG_VERSION=27.1.2

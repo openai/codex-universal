@@ -19,8 +19,8 @@ env:
 jobs:
   build-amd64:
     runs-on: 
-      group: codex-universal-runners
-      labels: codex-universal-linux-x64
+      group: codex-runners
+      labels: codex-linux-x64
     outputs:
       digest: ${{ steps.build.outputs.digest }}
     steps:
@@ -48,8 +48,8 @@ jobs:
 
   build-arm64:
     runs-on: 
-      group: codex-universal-runners
-      labels: codex-universal-linux-arm64
+      group: codex-runners
+      labels: codex-linux-arm64
     outputs:
       digest: ${{ steps.build.outputs.digest }}
     steps:
@@ -78,8 +78,8 @@ jobs:
   manifest-and-attest:
     if: ${{ github.event_name == 'push' }}
     runs-on: 
-      group: codex-universal-runners
-      labels: codex-universal-linux-x64
+      group: codex-runners
+      labels: codex-linux-x64
     needs: [build-amd64, build-arm64]
     steps:
       - uses: docker/login-action@v3

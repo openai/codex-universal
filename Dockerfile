@@ -93,7 +93,9 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     && echo 'eval "$(mise activate bash)"' >> /etc/profile \
     && mise settings set experimental true \
     && mise settings set override_tool_versions_filenames none \
-    && mise settings add idiomatic_version_file_enable_tools "[]"
+    && mise settings add idiomatic_version_file_enable_tools "[]" \
+    && mise settings add disable_backends asdf \
+    && mise settings add disable_backends vfox
 
 ENV PATH=$HOME/.local/share/mise/shims:$PATH
 
@@ -276,21 +278,34 @@ RUN --mount=type=cache,target=/root/.cache/mise \
 ### PHP ###
 
 ARG PHP_VERSIONS="8.5 8.4 8.3 8.2"
-ENV MISE_JOBS=4 MAKEFLAGS="-j4" CC="ccache gcc" CXX="ccache g++"
+ENV PHPENV_ROOT=/root/.phpenv
+ENV PATH=/root/.phpenv/bin:/root/.phpenv/shims:$PATH
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    --mount=type=cache,target=/root/.cache/mise \
     apt-get update && apt-get install -y --no-install-recommends \
         build-essential pkg-config ccache \
         autoconf=2.71-* bison=2:3.8.* re2c=3.1-* \
         libgd-dev=2.3.* libedit-dev=3.1-* libicu-dev=74.2-* libjpeg-dev=8c-* \
         libonig-dev=6.9.* libpng-dev=1.6.* libzip-dev=1.7.* \
-        libssl-dev zlib1g-dev libcurl4-openssl-dev libreadline-dev \
+        libssl-dev zlib1g-dev libcurl4-openssl-dev libreadline-dev libtidy-dev libxslt1-dev \
     && rm -rf /var/lib/apt/lists/* \
-    && mise install $(for v in $PHP_VERSIONS; do printf "php@%s " "$v"; done) \
-    && mise use --global "php@${PHP_VERSIONS%% *}" \
-    && mise cache clear || true
+    && git clone https://github.com/phpenv/phpenv.git /root/.phpenv \
+    && git clone https://github.com/php-build/php-build.git /root/.phpenv/plugins/php-build \
+    && echo 'eval "$(phpenv init - bash)"' >> /etc/profile \
+    && bash -lc '\
+        eval "$(phpenv init -)" && \
+        for v in $PHP_VERSIONS; do \
+            phpenv install -s "${v}snapshot"; \
+        done && \
+        phpenv rehash && \
+        phpenv global "${PHP_VERSIONS%% *}snapshot" \
+    ' \
+    && rm -rf /root/.phpenv/cache
+
+# Composer
+RUN curl -sS https://getcomposer.org/installer | php \
+    && mv composer.phar /usr/local/bin/composer
 
 ### ELIXIR ###
 

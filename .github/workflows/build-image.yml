@@ -18,14 +18,12 @@ env:
 
 jobs:
   build-amd64:
-    runs-on: ubuntu-24.04
+    runs-on: 
+      group: codex-runners
+      labels: codex-linux-x64
     outputs:
       digest: ${{ steps.build.outputs.digest }}
     steps:
-      - name: Free disk
-        run: |
-          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL || true
-          docker system prune -af || true
       - uses: actions/checkout@v6
       - uses: docker/login-action@v3
         with:
@@ -41,23 +39,20 @@ jobs:
           platforms: linux/amd64
           push: ${{ github.event_name == 'push' }}
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:amd64-${{ github.sha }}
-          # Use GHA cache only (works on PRs). Swap to registry cache on pushes if you prefer.
-          cache-from: type=gha,scope=${{ github.workflow }}-${{ runner.os }}-amd64
-          cache-to:   type=gha,mode=min,scope=${{ github.workflow }}-${{ runner.os }}-amd64
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache-amd64
+          cache-to:   type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache-amd64,mode=max
           provenance: false
           sbom: false
           secrets: |
             GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
 
   build-arm64:
-    runs-on: ubuntu-24.04-arm
+    runs-on: 
+      group: codex-runners
+      labels: codex-linux-arm64
     outputs:
       digest: ${{ steps.build.outputs.digest }}
     steps:
-      - name: Free disk
-        run: |
-          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL || true
-          docker system prune -af || true
       - uses: actions/checkout@v6
       - uses: docker/login-action@v3
         with:
@@ -73,8 +68,8 @@ jobs:
           platforms: linux/arm64
           push: ${{ github.event_name == 'push' }}
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:arm64-${{ github.sha }}
-          cache-from: type=gha,scope=${{ github.workflow }}-${{ runner.os }}-arm64
-          cache-to:   type=gha,mode=min,scope=${{ github.workflow }}-${{ runner.os }}-arm64
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache-arm64
+          cache-to:   type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache-arm64,mode=max
           provenance: false
           sbom: false
           secrets: |
@@ -82,7 +77,9 @@ jobs:
 
   manifest-and-attest:
     if: ${{ github.event_name == 'push' }}
-    runs-on: ubuntu-latest
+    runs-on: 
+      group: codex-runners
+      labels: codex-linux-x64
     needs: [build-amd64, build-arm64]
     steps:
       - uses: docker/login-action@v3

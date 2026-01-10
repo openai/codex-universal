@@ -27,10 +27,8 @@ javac -version
 gradle --version | head -n 3
 mvn --version | head -n 1
 
-if [ "$TARGETARCH" = "amd64" ]; then \
-    echo "- Swift:"
-    swift --version
-fi
+echo "- Swift:"
+swift --version
 
 echo "- Ruby:"
 ruby --version

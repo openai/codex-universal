@@ -67,3 +67,7 @@ In addition to the packages specified in the table above, the following packages
 - `elixir`: 1.18.3
 
 See [Dockerfile](Dockerfile) for the full details of installed packages.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md).

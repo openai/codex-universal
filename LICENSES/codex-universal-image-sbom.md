@@ -91,6 +91,7 @@ Generated for the OpenAI dev Docker image
 | Python | 3.10, 3.11.12, 3.12, 3.13 | https://www.python.org | pyenv | Python-2.0 |
 | Node.js | 18, 20, 22 | https://nodejs.org | nvm | MIT |
 | Java | OpenJDK 21 | https://openjdk.org | apt | GPL-2.0 with Classpath Exception |
+| .NET SDK | 8.0, 9.0, 10.0 | https://dotnet.microsoft.com | dotnet-install.sh | MIT |
 | Ruby | system default | https://www.ruby-lang.org | apt | Ruby / BSD dual-license |
 | Rust | stable | https://www.rust-lang.org | rustup | MIT OR Apache-2.0 |
 | poetry | latest | https://python-poetry.org | pipx | MIT |

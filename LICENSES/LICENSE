@@ -24,7 +24,7 @@ SOFTWARE.
 The Docker image incorporates a variety of open source components, including but not limited to:
 
 - Base system: Ubuntu 24.04
-- Languages: Python, Node.js, Ruby, Go, Rust, Java (OpenJDK), Swift
+- Languages: Python, Node.js, Ruby, Go, Rust, Java (OpenJDK), Swift, .NET (C#)
 - Developer tools: Poetry, Bun, Gradle, LLVM, pipx, pyenv, and others
 
 These components are governed by licenses such as:

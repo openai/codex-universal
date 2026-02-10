@@ -207,6 +207,38 @@ RUN --mount=type=cache,target=/root/.cache/mise \
     && mise use --global "maven@${MAVEN_VERSION}" \
     && mise cache clear || true
 
+### DOTNET ###
+
+# Install .NET SDKs for C# development. We keep them side-by-side under /opt/dotnet/<channel>
+# and provide a small wrapper at /usr/local/bin/dotnet that selects a default.
+ARG DOTNET_VERSIONS="10.0 9.0 8.0"
+
+RUN --mount=type=cache,target=/root/.cache/dotnet \
+    mkdir -p /opt/dotnet /opt/codex \
+    && curl -fsSL https://dot.net/v1/dotnet-install.sh -o /usr/local/bin/dotnet-install.sh \
+    && chmod +x /usr/local/bin/dotnet-install.sh \
+    && for v in $DOTNET_VERSIONS; do \
+         /usr/local/bin/dotnet-install.sh --channel "$v" --install-dir "/opt/dotnet/${v}" --no-path; \
+       done \
+    && echo "${DOTNET_VERSIONS%% *}" > /opt/codex/dotnet_default \
+    && printf '%s\n' \
+        '#!/bin/sh' \
+        'set -eu' \
+        '' \
+        'default_file="/opt/codex/dotnet_default"' \
+        'v=""' \
+        'if [ -f "$default_file" ]; then' \
+        '  v="$(cat "$default_file" 2>/dev/null || true)"' \
+        'fi' \
+        'if [ -z "$v" ]; then' \
+        '  v="10.0"' \
+        'fi' \
+        '' \
+        'export DOTNET_ROOT="/opt/dotnet/$v"' \
+        'exec "$DOTNET_ROOT/dotnet" "$@"' \
+      > /usr/local/bin/dotnet \
+    && chmod +x /usr/local/bin/dotnet
+
 ### SWIFT ###
 
 ARG SWIFT_VERSIONS="6.2 6.1 5.10"
@@ -329,6 +361,7 @@ RUN chmod +x /opt/verify.sh \
         NODE_VERSIONS="24 22 20 18" \
         RUST_VERSIONS="$RUST_VERSIONS" \
         GO_VERSIONS="$GO_VERSIONS" \
+        DOTNET_VERSIONS="$DOTNET_VERSIONS" \
         SWIFT_VERSIONS="$SWIFT_VERSIONS" \
         RUBY_VERSIONS="$RUBY_VERSIONS" \
         PHP_VERSIONS="$PHP_VERSIONS" \

@@ -10,6 +10,7 @@ CODEX_ENV_GO_VERSION=${CODEX_ENV_GO_VERSION:-}
 CODEX_ENV_SWIFT_VERSION=${CODEX_ENV_SWIFT_VERSION:-}
 CODEX_ENV_PHP_VERSION=${CODEX_ENV_PHP_VERSION:-}
 CODEX_ENV_JAVA_VERSION=${CODEX_ENV_JAVA_VERSION:-}
+CODEX_ENV_DOTNET_VERSION=${CODEX_ENV_DOTNET_VERSION:-}
 
 echo "Configuring language runtimes..."
 
@@ -88,4 +89,17 @@ if [ -n "${CODEX_ENV_JAVA_VERSION}" ]; then
         mise use --global "java@${CODEX_ENV_JAVA_VERSION}"
         java -version
     fi
+fi
+
+if [ -n "${CODEX_ENV_DOTNET_VERSION}" ]; then
+    current="$(dotnet --version | cut -d. -f1,2)"   # ==> 10.0
+    echo "# .NET SDK: ${CODEX_ENV_DOTNET_VERSION} (default: ${current})"
+    if [ ! -d "/opt/dotnet/${CODEX_ENV_DOTNET_VERSION}" ]; then
+        echo "Requested .NET SDK version is not installed: ${CODEX_ENV_DOTNET_VERSION}" >&2
+        echo "Installed SDK channels:" >&2
+        ls -1 /opt/dotnet >&2 || true
+        exit 1
+    fi
+    echo "${CODEX_ENV_DOTNET_VERSION}" > /opt/codex/dotnet_default
+    dotnet --version
 fi

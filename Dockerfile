@@ -225,7 +225,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 ### RUST ###
 
-ARG RUST_VERSIONS="1.93.0 1.92.0 1.91.1 1.90.0 1.89.0 1.88.0 1.87.0 1.86.0 1.85.1 1.84.1 1.83.0"
+ARG RUST_VERSIONS="1.95.0 1.94.0 1.93.0 1.92.0 1.91.1 1.90.0 1.89.0 1.88.0 1.87.0 1.86.0 1.85.1 1.84.1 1.83.0"
 RUN --mount=type=cache,target=/root/.cargo/registry \
     --mount=type=cache,target=/root/.cargo/git \
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain none \

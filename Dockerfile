@@ -67,7 +67,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         sqlite3=3.45.* \
         swig3.0=3.0.* \
         tk-dev=8.6.* \
-        tzdata=2025b-* \
+        tzdata=2026a-* \
         universal-ctags=5.9.* \
         unixodbc-dev=2.3.* \
         unzip=6.0-* \
